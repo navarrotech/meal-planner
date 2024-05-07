@@ -1,0 +1,271 @@
+@import './theme'
+
+// Noto Sans & Montserrat
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;1,300;1,400;1,600&family=Noto+Sans:ital,wght@0,200;0,400;0,600;0,800;1,200;1,400;1,600;1,800&display=swap')
+
+// Variable Changes
+$family-sans-serif: 'Noto Sans', 'Montserrat', Arial, Helvetica, sans-serif
+
+$white: $dark
+$title-color: #FFFFFF
+$subtitle-color: #FFFFFF
+$input-background-color: $dark
+$input-border-color: $primary
+$input-color: #FFFFFF
+
+$label-color: #FFFFFF
+
+@import "bulma/sass/utilities/mixins"
+
+$tabs-border-bottom-color: $border !default
+$tabs-border-bottom-style: solid !default
+$tabs-border-bottom-width: 1px !default
+$tabs-link-color: $text !default
+$tabs-link-hover-border-bottom-color: $text-strong !default
+$tabs-link-hover-color: $text-strong !default
+$tabs-link-active-border-bottom-color: $link !default
+$tabs-link-active-color: $link !default
+$tabs-link-padding: 0.5em 1em !default
+
+$tabs-boxed-link-radius: $radius !default
+$tabs-boxed-link-hover-background-color: $background !default
+$tabs-boxed-link-hover-border-bottom-color: $primary !default
+
+$tabs-boxed-link-active-background-color: $primary !default
+$tabs-boxed-link-active-border-color: $primary 
+$tabs-boxed-link-active-border-bottom-color: transparent !default
+
+$tabs-toggle-link-border-color: $primary 
+$tabs-toggle-link-border-style: solid !default
+$tabs-toggle-link-border-width: 1px !default
+$tabs-toggle-link-hover-background-color: $background !default
+$tabs-toggle-link-hover-border-color: $primary
+$tabs-toggle-link-radius: $radius !default
+$tabs-toggle-link-active-background-color: $primary
+$tabs-toggle-link-active-border-color: $primary
+$tabs-toggle-link-active-color: $link-invert !default
+
+$pagination-current-background-color: $primary !important
+$pagination-current-border-color: #ffffff !important
+$pagination-active-background-color: $primary !important
+$pagination-active-border-color: #ffffff !important
+
+@import "bulma/bulma"
+@import '@navarrotech/bulma/index.sass'
+@import 'bulma-divider/src/sass/index.sass'
+@import 'bulma-tooltip'
+
+html
+    background: #0A0A0A
+
+// .tabs
+//     @extend %block
+//     +overflow-touch
+//     @extend %unselectable
+//     align-items: stretch
+//     display: flex
+//     font-size: $size-normal
+//     justify-content: space-between
+//     overflow: hidden
+//     overflow-x: auto
+//     white-space: nowrap
+    
+//     a,
+//     .tab
+//         cursor: pointer
+//         align-items: center
+//         border-bottom-color: $tabs-border-bottom-color
+//         border-bottom-style: $tabs-border-bottom-style
+//         border-bottom-width: $tabs-border-bottom-width
+//         color: $tabs-link-color
+//         display: flex
+//         justify-content: center
+//         margin-bottom: -#{$tabs-border-bottom-width}
+//         padding: $tabs-link-padding
+//         vertical-align: top
+        
+//         &:hover
+//             border-bottom-color: $tabs-link-hover-border-bottom-color
+//             color: $tabs-link-hover-color
+//             background-color: rgba(0,0,0,0.025)
+//     li
+//         display: block
+//         &.is-active
+//             a,
+//             .tab
+//                 border-bottom-color: $tabs-link-active-border-bottom-color
+//                 color: $tabs-link-active-color
+                
+//     // Styles
+//     &.is-boxed
+//         a,
+//         .tab
+//             border: 1px solid transparent
+
+//             +ltr
+//                 border-radius: $tabs-boxed-link-radius $tabs-boxed-link-radius 0 0
+//             +rtl
+//                 border-radius: 0 0 $tabs-boxed-link-radius $tabs-boxed-link-radius
+//             &:hover
+//                 background-color: $tabs-boxed-link-hover-background-color
+//                 border-bottom-color: $tabs-boxed-link-hover-border-bottom-color
+//             li
+//                 &.is-active
+//                     a,
+//                     .tab
+//                         background-color: $tabs-boxed-link-active-background-color
+//                         border-color: $tabs-boxed-link-active-border-color
+//                         border-bottom-color: $tabs-boxed-link-active-border-bottom-color !important
+
+//     &.is-toggle
+//         a,
+//         .tab
+//             border-color: $tabs-toggle-link-border-color
+//             border-style: $tabs-toggle-link-border-style
+//             border-width: $tabs-toggle-link-border-width
+//             margin-bottom: 0
+//             position: relative
+//     li
+//         &.is-active
+//             a,
+//             .tab
+//                 background-color: $tabs-toggle-link-active-background-color
+//                 border-color: $tabs-toggle-link-active-border-color
+//                 color: $tabs-toggle-link-active-color
+//                 z-index: 1
+
+//     &.is-toggle-rounded
+//         li
+//             &:first-child a,
+//             &:first-child .tab
+//                 +ltr
+//                     border-bottom-left-radius: $radius-rounded
+//                     border-top-left-radius: $radius-rounded
+//                     padding-left: 1.25em
+//                 +rtl
+//                     border-bottom-right-radius: $radius-rounded
+//                     border-top-right-radius: $radius-rounded
+//                     padding-right: 1.25em
+//             &:last-child a,
+//             &:last-child .tab
+//                 +ltr
+//                     border-bottom-right-radius: $radius-rounded
+//                     border-top-right-radius: $radius-rounded
+//                     padding-right: 1.25em
+//                 +rtl
+//                     border-bottom-left-radius: $radius-rounded
+//                     border-top-left-radius: $radius-rounded
+//                     padding-left: 1.25em
+
+.tag
+    &.link
+        text-decoration: none !important
+        &:hover
+            background: $primary !important
+            color: white !important
+
+.react-numeric-input
+    width: 100%
+
+    b
+        display: none !important
+
+    input
+        width: 100%
+        padding-left: calc(0.75em - 1px) !important
+
+.level > .tabs
+    width: 100%
+
+// Navarrotech should fix:
+.switch
+    width: 3.6em
+    height: 1.8em
+
+    &.is-rounded
+        border-radius: 3em !important
+
+    &.is-small
+        font-size: 0.7rem !important
+    
+    .slider::before
+        width: 1.6em
+        height: 1.6em
+        left: 0.15em
+        bottom: 0.1em
+    
+    input:checked + .slider:before
+        transform: translateX(1.7em) !important
+
+////////////////////////////////////
+// Loader
+
+@keyframes l7 
+    33%  
+        inset:-10px
+        transform: rotate(0deg)
+    66%  
+        inset:-10px
+        transform: rotate(90deg)
+    100% 
+        inset:0    
+        transform: rotate(90deg)
+
+.customLoader 
+    width: 40px
+    height: 40px
+    margin: 1em auto
+    aspect-ratio: 1
+    color: $primary
+    position: relative
+    background: conic-gradient(from 134deg at top   ,currentColor 92deg,#0000 0) top, conic-gradient(from -46deg at bottom,currentColor 92deg,#0000 0) bottom
+    background-size: 100% 50%
+    background-repeat: no-repeat
+
+    &:before
+        content: ''
+        position: absolute
+        inset: 0
+        $g: currentColor 14.5px,#0000 0 calc(100% - 14.5px),currentColor 0
+        background: linear-gradient( 45deg, $g), linear-gradient(-45deg, $g)
+        animation: l7 1.5s infinite cubic-bezier(0.3,1,0,1)
+
+.sidebar
+    .modal-card
+        margin-right: unset
+        height: 100vh
+        max-height: 100vh
+        width: 425px
+
+    .modal-card-head
+        background: $primary
+        min-height: 6em
+        border-radius: 0 !important
+        border-bottom: none !important
+
+        .modal-card-title
+            color: white
+            font-weight: 800
+
+    .modal-card-foot
+        background: #fff
+        border-top: none !important
+        border-radius: 0 !important
+
+.button
+    &.is-google
+        background: #4285F4
+        color: white
+        font-weight: 500
+        border: none
+        margin-top: 1em
+
+// Adjusting for login page
+.is-divider::after
+    transform: translateY(-0.95rem) !important
+    -webkit-transform: translateY(-0.95rem) !important
+
+@media screen and (max-width: 769px)
+    .sidebar
+        .modal-card
+            width: 100vw
