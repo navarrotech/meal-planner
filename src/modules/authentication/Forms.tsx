@@ -125,7 +125,7 @@ export function Authenticator({ initialMode = 'login', showModeSwitcher }: Props
                 </h2>
             </div>
             {/* Google sign in button */}
-            <div className="block buttons is-centered">
+            {/* <div className="block buttons is-centered">
                 <button
                     className="button is-fullwidth is-google"
                     type="button"
@@ -156,7 +156,7 @@ export function Authenticator({ initialMode = 'login', showModeSwitcher }: Props
                     <span>Sign in with Google</span>
                 </button>
             </div>
-            <div className="is-divider" data-content="OR" />
+            <div className="is-divider" data-content="OR" /> */}
             {/* Email and password input */}
             <div className="block">
                 <div className="field">
