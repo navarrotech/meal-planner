@@ -1,0 +1,36 @@
+// Copyright © 2024 Navarrotech
+
+:root
+    --fc-border-color: #3d3d3d
+
+.fc
+    th[role=presentation]
+        border-radius: 6px 6px 0 0
+        background: $primary
+
+    .fc-timegrid-col.fc-day-today
+        background-color: color.adjust($primary, $alpha: -0.85)
+
+    .fc-timegrid-now-indicator-line
+        border-color: $primary
+
+    .fc-timegrid-now-indicator-arrow
+        border-color: $primary
+        border-bottom-color: transparent
+        border-top-color: transparent
+
+    .fc-scrollgrid
+        border-top: 1px solid transparent
+
+    .fc-today-button
+        text-transform: capitalize
+
+    .fc-col-header-cell-cushion
+        width: 100%
+        display: block
+        text-align: center
+        color: white
+        padding: 0.5em 0
+
+    .fc-timegrid-slot-lane
+        border-top-color: #555555

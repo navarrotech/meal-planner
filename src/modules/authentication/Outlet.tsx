@@ -1,13 +1,12 @@
-// Copyright © 2023 Navarrotech
+// Copyright © 2024 Navarrotech
 import { useEffect } from "react";
 
 // UI
 import { Outlet, useNavigate } from "react-router";
-import { RESET_STATE } from "@/constants";
 
 // Actions
-import { dispatch, useSelector } from "@/store";
-import { init as initVideo } from "../videos/actions";
+import { useSelector } from "@/store";
+import Topbar from "@/common/Topbar";
 
 export function AuthorizedOutlet(){
     const authorized = useSelector(state => state.user.authorized);
@@ -15,16 +14,10 @@ export function AuthorizedOutlet(){
 
     useEffect(() => {
         if (!authorized){
-            dispatch({
-                type: RESET_STATE,
-                payload: null
-            })
             console.log('Unauthorized, redirecting to login');
             navigate('/login');
             return;
         }
-        
-        initVideo();
     }, [ authorized ])
 
     if (!authorized){
@@ -32,12 +25,7 @@ export function AuthorizedOutlet(){
     }
 
     return <div>
+        <Topbar />
         <Outlet />
     </div>
-}
-
-export function UnauthorizedOutlet(){
-    return <section className="section">
-        <Outlet />
-    </section>
 }

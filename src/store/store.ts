@@ -4,12 +4,12 @@ import { type ThunkAction, configureStore, Action } from '@reduxjs/toolkit'
 
 // Reducers
 import userReducer from '../modules/authentication/reducer'
-import videoReducer from '../modules/videos/reducer'
+import recipeReducer from '../modules/recipes/reducer'
 
 const store = configureStore({
   reducer: {
     user: userReducer.reducer,
-    videos: videoReducer.reducer,
+    recipes: recipeReducer.reducer
   },
   middleware: getDefaultMiddleware =>
   getDefaultMiddleware({
@@ -18,7 +18,6 @@ const store = configureStore({
   }),
   devTools: process.env.NODE_ENV === 'development'
 })
-
 
 export const dispatch = store.dispatch;
 export const getState = store.getState;

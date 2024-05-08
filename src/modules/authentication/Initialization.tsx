@@ -1,4 +1,4 @@
-// Copyright © 2023 Navarrotech
+// Copyright © 2024 Navarrotech
 import { useEffect, type ReactNode } from "react";
 
 // Framework
@@ -7,6 +7,7 @@ import { auth } from "@/firebase";
 // Redux
 import { dispatch, useSelector } from "@/store";
 import { finishInit, setUser } from "@/modules/authentication/reducer";
+import { initialize, reset } from "@/store/action";
 
 type Props = {
     children: ReactNode
@@ -21,9 +22,15 @@ export default function Initialization({ children }: Props){
                 dispatch(
                     setUser(user)
                 )
+                dispatch(
+                    initialize()
+                )
             } else {
                 dispatch(
                     finishInit()
+                )
+                dispatch(
+                    reset()
                 )
             }
         })

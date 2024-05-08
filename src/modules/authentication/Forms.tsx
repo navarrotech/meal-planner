@@ -1,10 +1,10 @@
-// Copyright © 2023 Navarrotech
+// Copyright © 2024 Navarrotech
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 // UI
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
+import { faArrowRight, faPlus } from '@fortawesome/free-solid-svg-icons'
 
 // Redux
 import { logout } from './reducer'
@@ -104,7 +104,7 @@ export function Authenticator({ initialMode = 'login', showModeSwitcher }: Props
     }
 
     return <div className="subcontainer is-mini is-centered">
-        <div className="block box">
+        <form className="block box">
             <div className="block has-text-centered">
                 <h1 className="is-size-3 has-text-weight-bold is-capitalized">{ mode }</h1>
                 <h2 className="is-size-6 mt-2">
@@ -233,10 +233,13 @@ export function Authenticator({ initialMode = 'login', showModeSwitcher }: Props
                     loading={loading}
                     onClick={login}
                 >
-                    <span className="icon">
-                        <FontAwesomeIcon icon={faArrowRight} />
-                    </span>
                     <span>{ mode === 'login' ? "Login" : "Sign up" }</span>
+                    { !loading
+                        ? <span className="icon">
+                            <FontAwesomeIcon icon={mode === 'login' ? faArrowRight : faPlus} />
+                        </span>
+                        : <></>
+                    }
                 </Button>
             </div>
             {/* Forgot password prompt: */}
@@ -246,7 +249,7 @@ export function Authenticator({ initialMode = 'login', showModeSwitcher }: Props
                 </div>
                 : <></>
             }
-        </div>
+        </form>
     </div>
 }
 

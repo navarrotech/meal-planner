@@ -1,4 +1,4 @@
-// Copyright © 2023 Navarrotech
+// Copyright © 2024 Navarrotech
 
 // React.js & Router
 import ReactDOM from 'react-dom/client';
@@ -10,18 +10,21 @@ import './firebase'
 
 // Redux
 import { Provider } from 'react-redux'
-import Initialization from './modules/core/Initialization'
+import Initialization from './modules/authentication/Initialization'
 import store from './store/store'
 
 // Modules
 import { AuthorizedOutlet } from './modules/authentication/Outlet';
 import * as Auth from './modules/authentication/Forms'
-import VideoManager from './modules/videos/Layout'
+import VideoManager from './modules/meals/Layout'
 
 // Stylesheet
 import "./sass/index.sass"
 
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+const root = ReactDOM.createRoot(
+    document.getElementById('root') as HTMLElement
+);
+
 root.render(
     <Provider store={store}>
         <Initialization>
@@ -31,8 +34,8 @@ root.render(
                     <Route path="/signup" element={<Auth.Layout mode="signup" />} />
                     <Route path="/logout" element={<Auth.Logout />} />
                     <Route path="/dashboard" element={<AuthorizedOutlet />}>
-                        <Route path="/dashboard" index element={<Navigate to="/dashboard/videos" />} />
-                        <Route path="/dashboard/videos" element={<VideoManager />} />
+                        <Route path="/dashboard" index element={<Navigate to="/dashboard/meals" />} />
+                        <Route path="/dashboard/meals" element={<VideoManager />} />
                     </Route>
                     <Route path="*" element={<Navigate to="/login" />} />
                 </Routes>

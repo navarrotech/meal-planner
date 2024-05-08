@@ -1,4 +1,4 @@
-// Copyright © 2023 Navarrotech
+// Copyright © 2024 Navarrotech
 
 import {
     type TypedUseSelectorHook,

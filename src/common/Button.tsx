@@ -1,4 +1,7 @@
-// Copyright © 2023 Navarrotech
+// Copyright © 2024 Navarrotech
+
+// Typescript
+import type { BulmaColors } from '@/types'
 import type { ReactNode, ButtonHTMLAttributes } from 'react'
 
 type Props = {
@@ -7,10 +10,8 @@ type Props = {
     children: ReactNode
     disabled?: boolean
     loading?: boolean
-    color?: Color
+    color?: BulmaColors
 } & ButtonHTMLAttributes<HTMLButtonElement>
-
-type Color = 'primary' | 'secondary' | 'success' | 'warning' | 'danger'
 
 export default function Button(props: Props){
     const {

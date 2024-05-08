@@ -27,6 +27,9 @@ $tabs-link-active-border-bottom-color: $link !default
 $tabs-link-active-color: $link !default
 $tabs-link-padding: 0.5em 1em !default
 
+$modal-card-title-color: white
+$modal-card-head-background-color: $dark
+
 $tabs-boxed-link-radius: $radius !default
 $tabs-boxed-link-hover-background-color: $background !default
 $tabs-boxed-link-hover-border-bottom-color: $primary !default
@@ -34,6 +37,18 @@ $tabs-boxed-link-hover-border-bottom-color: $primary !default
 $tabs-boxed-link-active-background-color: $primary !default
 $tabs-boxed-link-active-border-color: $primary 
 $tabs-boxed-link-active-border-bottom-color: transparent !default
+
+$button-focus-border-color: $primary
+$button-focus-text-color: $primary
+$button-color: white
+$button-hover-color: white
+$button-background-color: rgba(255, 255, 255, 0.2)
+$button-border-color: rgba(255, 255, 255, 0.2)
+$button-active-color: white
+$button-text-hover-color: white
+$button-text-color: white
+
+$scheme-invert: $white
 
 $tabs-toggle-link-border-color: $primary 
 $tabs-toggle-link-border-style: solid !default
@@ -53,109 +68,29 @@ $pagination-active-border-color: #ffffff !important
 @import "bulma/bulma"
 @import '@navarrotech/bulma/index.sass'
 @import 'bulma-divider/src/sass/index.sass'
+@import '@creativebulma/bulma-tagsinput/src/sass/index'
 @import 'bulma-tooltip'
 
 html
     background: #0A0A0A
 
-// .tabs
-//     @extend %block
-//     +overflow-touch
-//     @extend %unselectable
-//     align-items: stretch
-//     display: flex
-//     font-size: $size-normal
-//     justify-content: space-between
-//     overflow: hidden
-//     overflow-x: auto
-//     white-space: nowrap
-    
-//     a,
-//     .tab
-//         cursor: pointer
-//         align-items: center
-//         border-bottom-color: $tabs-border-bottom-color
-//         border-bottom-style: $tabs-border-bottom-style
-//         border-bottom-width: $tabs-border-bottom-width
-//         color: $tabs-link-color
-//         display: flex
-//         justify-content: center
-//         margin-bottom: -#{$tabs-border-bottom-width}
-//         padding: $tabs-link-padding
-//         vertical-align: top
-        
-//         &:hover
-//             border-bottom-color: $tabs-link-hover-border-bottom-color
-//             color: $tabs-link-hover-color
-//             background-color: rgba(0,0,0,0.025)
-//     li
-//         display: block
-//         &.is-active
-//             a,
-//             .tab
-//                 border-bottom-color: $tabs-link-active-border-bottom-color
-//                 color: $tabs-link-active-color
-                
-//     // Styles
-//     &.is-boxed
-//         a,
-//         .tab
-//             border: 1px solid transparent
+.button svg
+    color: white
 
-//             +ltr
-//                 border-radius: $tabs-boxed-link-radius $tabs-boxed-link-radius 0 0
-//             +rtl
-//                 border-radius: 0 0 $tabs-boxed-link-radius $tabs-boxed-link-radius
-//             &:hover
-//                 background-color: $tabs-boxed-link-hover-background-color
-//                 border-bottom-color: $tabs-boxed-link-hover-border-bottom-color
-//             li
-//                 &.is-active
-//                     a,
-//                     .tab
-//                         background-color: $tabs-boxed-link-active-background-color
-//                         border-color: $tabs-boxed-link-active-border-color
-//                         border-bottom-color: $tabs-boxed-link-active-border-bottom-color !important
+.input:not(.is-primary),
+.textarea:not(.is-primary),
+.select:not(.is-primary) select
+    transition: border-color 0.2s
+    border-color: rgba(255, 255, 255, 0.6)
 
-//     &.is-toggle
-//         a,
-//         .tab
-//             border-color: $tabs-toggle-link-border-color
-//             border-style: $tabs-toggle-link-border-style
-//             border-width: $tabs-toggle-link-border-width
-//             margin-bottom: 0
-//             position: relative
-//     li
-//         &.is-active
-//             a,
-//             .tab
-//                 background-color: $tabs-toggle-link-active-background-color
-//                 border-color: $tabs-toggle-link-active-border-color
-//                 color: $tabs-toggle-link-active-color
-//                 z-index: 1
+    &:focus
+        border-color: $primary
 
-//     &.is-toggle-rounded
-//         li
-//             &:first-child a,
-//             &:first-child .tab
-//                 +ltr
-//                     border-bottom-left-radius: $radius-rounded
-//                     border-top-left-radius: $radius-rounded
-//                     padding-left: 1.25em
-//                 +rtl
-//                     border-bottom-right-radius: $radius-rounded
-//                     border-top-right-radius: $radius-rounded
-//                     padding-right: 1.25em
-//             &:last-child a,
-//             &:last-child .tab
-//                 +ltr
-//                     border-bottom-right-radius: $radius-rounded
-//                     border-top-right-radius: $radius-rounded
-//                     padding-right: 1.25em
-//                 +rtl
-//                     border-bottom-left-radius: $radius-rounded
-//                     border-top-left-radius: $radius-rounded
-//                     padding-left: 1.25em
+.delete
+    background-color: $black
+
+    &::before, &::after
+        background-color: white
 
 .tag
     &.link
@@ -173,6 +108,23 @@ html
     input
         width: 100%
         padding-left: calc(0.75em - 1px) !important
+
+.field.fancy-label
+    position: relative
+
+    &:not(:last-child)
+        margin-bottom: 1em
+
+    .label
+        position: absolute
+        left: 1em
+        top: -0.8em
+        font-size: 0.8em
+        font-weight: 400
+        z-index: 1
+        background: $dark
+        padding-left: 0.4em
+        padding-right: 0.4em
 
 .level > .tabs
     width: 100%
@@ -229,6 +181,21 @@ html
         $g: currentColor 14.5px,#0000 0 calc(100% - 14.5px),currentColor 0
         background: linear-gradient( 45deg, $g), linear-gradient(-45deg, $g)
         animation: l7 1.5s infinite cubic-bezier(0.3,1,0,1)
+
+.modal
+    .modal-card
+        border: 1px solid rgba(255, 255, 255, 0.3)
+        border-radius: $modal-card-head-radius - 2px
+
+    .modal-card-head
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3)
+
+    .modal-card-foot
+        border-top: 1px solid rgba(255, 255, 255, 0.3)
+
+    &.is-large
+        .modal-card
+            width: 1000px
 
 .sidebar
     .modal-card
