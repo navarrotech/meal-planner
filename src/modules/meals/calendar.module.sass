@@ -1,0 +1,47 @@
+// Copyright © 2024 Navarrotech
+
+.dropZone
+    position: relative
+    height: 18vh
+    background: $dark
+    border: 2px dashed rgba(255, 255, 255, 0.2)
+    border-radius: 8px
+    margin: 0 4px
+    padding: 1.2em 0.5em
+
+    font-size: 0.8rem
+
+    &:not(:last-child)
+        margin-bottom: 1em
+
+    &.hoveredOver
+        border-color: $primary
+
+    > p
+        position: absolute
+        top: -0.8em
+        left: 0
+        right: 0
+        width: fit-content
+        margin: auto
+        display: block
+        padding: 0 0.5em
+        background: $dark
+        font-size: 1rem
+    
+    .plannedMeal
+        display: block
+        width: 100%
+        background: rgba(255, 255, 255, 0.5)
+        padding: 0.4em 0.6em
+        border-radius: 6px
+        cursor: pointer
+
+        &:not(:last-child)
+            margin-bottom: 0.4em
+
+        &.reDragged
+            background: $primary
+
+        &:hover
+            background: rgba(255, 255, 255, 0.4)

@@ -4,18 +4,18 @@
 import { useState, useEffect } from "react";
 
 // Typescript
-import type { PlannedMeal } from "@/types";
+import type { MealType, PlannedMeal } from "@/types";
 
 // Firebase data
 import { onValue } from "firebase/database";
-import { mealsRef } from "./references";
+import { mealsListRef } from "./references";
 
-export function useMealPlans(year: string, month: string, startDay: string) {
-    const [ meals, setMeals ] = useState<PlannedMeal[] | null>(null);
+export function useMealPlans(year: string, month: string, startDay: string, type: MealType) {
+    const [ meals, setMeals ] = useState<PlannedMeal[]>([]);
 
     useEffect(() => {
         const unsubscribe = onValue(
-            mealsRef( year, month, startDay ),
+            mealsListRef( year, month, startDay, type ),
             (snapshot) => {
                 const data = snapshot.val();
                 setMeals(
@@ -27,7 +27,7 @@ export function useMealPlans(year: string, month: string, startDay: string) {
         return () => {
             unsubscribe();
         }
-    }, [ startDay, month, year ]);
+    }, [ startDay, month, year, type ]);
 
     return meals
 }

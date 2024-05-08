@@ -21,6 +21,7 @@
 
     /* Custom */
     "allowJs": true,
+    "allowSyntheticDefaultImports": true,
 
     /* Paths */
     "baseUrl": "./src",

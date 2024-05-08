@@ -10,14 +10,12 @@ export function makeNewRecipe(): Recipe {
         image: "",
         title: "",
         details: "",
-
-        type: "dinner",
-
-        ingredients: [],
         instructions: "",
 
+        type: "dinner",
+        
+        ingredients: [],
         tags: [],
-        categories: [],
     };
 }
 

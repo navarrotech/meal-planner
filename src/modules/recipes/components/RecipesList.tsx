@@ -7,6 +7,10 @@ import { useRecipes } from "../hooks";
 // Typescript
 import type { Recipe } from "@/types";
 
+// Redux
+import { dispatch } from "@/store";
+import { setDraggingRecipe } from "../reducer";
+
 // Iconography & styling
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faSearch } from "@fortawesome/free-solid-svg-icons";
@@ -53,7 +57,22 @@ export default function RecipesList(){
         content = keys.map(recipeId => {
             const recipe = byId[recipeId];
             return (
-                <div className={styles.recipeListItem} key={recipe.id}>
+                <div
+                    draggable
+                    id={recipe.id}
+                    key={recipe.id}
+                    className={styles.recipeListItem}
+                    onDragStart={() => {
+                        dispatch(
+                            setDraggingRecipe(recipe)
+                        )
+                    }}
+                    onDragEnd={() => {
+                        dispatch(
+                            setDraggingRecipe(null)
+                        )
+                    }}
+                >
                     <h2>{ recipe.title }</h2>
                     <Button
                         className="is-small is-dark"

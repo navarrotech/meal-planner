@@ -1,6 +1,11 @@
 // Copyright © 2024 Navarrotech
 
-import { database } from '@/firebase';
-import { ref } from 'firebase/database';
+// Typescript
+import type { MealType } from '@/types'
 
-export const mealsRef = (year: string, month: string, startDay: string) => ref(database, `meals/${year}/${month}/${startDay}/`);
+// Firebase
+import { database } from '@/firebase'
+import { ref } from 'firebase/database'
+
+export const mealsListRef = (year: string, month: string, startDay: string, type: MealType) => ref(database, `meals/${year}/${month}/${startDay}/${type}`)
+export const mealsSetRef = (year: string, month: string, startDay: string, type: MealType, id: string) => ref(database, `meals/${year}/${month}/${startDay}/${type}/${id}`)
