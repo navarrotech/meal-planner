@@ -5,7 +5,7 @@ import { useState } from "react";
 
 // Redux
 import { dispatch, useSelector, getState } from "@/store";
-import { setDraggingRecipe, setDraggingMeal, selectMeal } from "@/modules/recipes/reducer";
+import { setDraggingRecipe, setDraggingMeal, selectMeal, setSelectedDropzone } from "@/modules/recipes/reducer";
 
 // Utility
 import moment from "moment";
@@ -36,6 +36,18 @@ export default function Dropzone({ date, type }: Props) {
     return <div
         data-key="dropzone"
         className={`${styles.dropZone} ${hoveredOver ? styles.hoveredOver : ''}`}
+        onClick={(e) => {
+            const target = e.target as HTMLDivElement
+            if (target?.getAttribute("data-key") !== "dropzone"){
+                return;
+            }
+            dispatch(
+                setSelectedDropzone({
+                    date,
+                    type
+                })
+            )
+        }}
         onDragOver={(e) => {
             e.preventDefault()
             if (!hoveredOver){
@@ -104,7 +116,7 @@ export default function Dropzone({ date, type }: Props) {
                     onDragExit={(e) => {
                         e.preventDefault()
                     }}
-                    onDragEnd={(e) => {
+                    onDragEnd={() => {
                         dispatch(
                             setDraggingMeal(null)
                         )

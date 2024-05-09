@@ -139,7 +139,7 @@ html
         padding-right: 0.4em
 
 .level > .tabs
-    width: 100%
+        width: 100%
 
 // Navarrotech should fix:
 .switch
@@ -244,7 +244,71 @@ html
     transform: translateY(-0.95rem) !important
     -webkit-transform: translateY(-0.95rem) !important
 
-@media screen and (max-width: 769px)
+@media screen and (max-width: $tablet)
+    .button
+        font-size: 0.8rem !important
+
+    .title
+        &.is-size-1
+            font-size: 2rem !important
+        &.is-size-2
+            font-size: 1.75rem !important
+        &.is-size-3
+            font-size: 1.5rem !important
+        &.is-size-4
+            font-size: 1.25rem !important
+        &.is-size-5
+            font-size: 1.1rem !important
+        &.is-size-6
+            font-size: 0.9rem !important
+        &.is-size-7
+            font-size: 0.8rem !important
+
+    .section
+        padding-top: 1.5em !important
+        padding-left: 0.8em !important
+        padding-right: 0.8em !important
+
     .sidebar
         .modal-card
             width: 100vw
+
+    .level:not(.not-mobile)
+        display: flex !important
+        align-tiems: center !important
+        justify-content: space-between !important
+
+    .modal
+        .modal-card-title
+            font-size: 1rem !important
+
+        .modal-card-head
+            .delete.is-large
+                font-size: 1rem !important
+                height: 24px
+                max-height: 24px
+                max-width: 24px
+                min-height: 24px
+                min-width: 24px
+                width: 24px
+
+    .navbar
+        .navbar-divider
+            display: block
+            background-color: rgba(255, 255, 255, 0.3)
+
+        .navbar-menu
+            position: absolute
+            left: 0
+            right: 0
+
+            &.is-active::before
+                content: ''
+                position: absolute
+                top: 0
+                left: 0
+                right: 0
+                bottom: 0
+                height: 100vh
+                background: $dark
+                

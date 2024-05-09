@@ -1,13 +1,21 @@
 // Copyright © 2024 Navarrotech
 
+// React.js
+import { useState } from "react"
+import { NavLink } from "react-router-dom"
+
+// Iconography
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faUser } from "@fortawesome/free-solid-svg-icons"
 
-import Dropdown from "./Dropdown"
+// Redux
 import { useSelector } from "@/store"
-import { NavLink } from "react-router-dom"
+
+// Components
+import Dropdown from "./Dropdown"
 
 export default function Topbar() {
+    const [ showMobileMenu, setShowMobileMenu ] = useState<boolean>(false)
     const user = useSelector(state => state.user.current)
 
     if (!user) {
@@ -23,9 +31,10 @@ export default function Topbar() {
                 </div>
                 <div
                     role="button"
-                    className="navbar-burger"
+                    className={"navbar-burger" + (showMobileMenu ? " is-active" : "")}
                     aria-label="menu"
                     aria-expanded="false"
+                    onClick={() => setShowMobileMenu(!showMobileMenu)}
                 >
                     <span aria-hidden="true"></span>
                     <span aria-hidden="true"></span>
@@ -33,29 +42,43 @@ export default function Topbar() {
                 </div>
             </div>
 
-            <div className="navbar-menu">
+            <div className={"navbar-menu" + (showMobileMenu ? " is-active" : "")}>
                 <div className="navbar-start">
                     <NavLink
                         className={({ isActive }) => `navbar-item ${isActive ? 'is-selected' : ''}`}
                         to="/dashboard/today"
+                        onClick={() => setShowMobileMenu(false)}
                     >
                         Today
                     </NavLink>
                     <NavLink
                         className={({ isActive }) => `navbar-item ${isActive ? 'is-selected' : ''}`}
                         to="/dashboard/meals"
+                        onClick={() => setShowMobileMenu(false)}
                     >
                         Meal Planner
                     </NavLink>
                     <NavLink
                         className={({ isActive }) => `navbar-item ${isActive ? 'is-selected' : ''}`}
                         to="/dashboard/recipes"
+                        onClick={() => setShowMobileMenu(false)}
                     >
                         Recipes
                     </NavLink>
+                    <hr className="navbar-divider" />
+                    <NavLink
+                        to="/account"
+                        className="navbar-item"
+                        onClick={() => setShowMobileMenu(false)}
+                    >Account (Coming soon)</NavLink>
+                    <NavLink
+                        to="/logout"
+                        className="navbar-item"
+                        onClick={() => setShowMobileMenu(false)}
+                    >Logout</NavLink>
                 </div>
 
-                <div className="navbar-end">
+                <div className="navbar-end is-hidden-touch">
                     <div className="navbar-item">
                         <Dropdown
                             isTriggerRounded

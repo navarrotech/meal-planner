@@ -51,6 +51,8 @@
         font-size: 0.85rem
         border-radius: 4px
 
+        min-height: 31px
+
         transition: background 200ms ease
         cursor: pointer
 
@@ -105,3 +107,20 @@
 
         .titles
             margin-top: 0.3em
+
+
+@media screen and (max-width: $tablet)
+    .recipeLayout
+
+        .recipeCard
+            width: calc(50% - 0.5em)
+
+            &:not(:last-child)
+                margin-bottom: 0.1em !important
+
+            .media
+                height: 80px !important
+
+            .titles
+                :global(.title)
+                    font-weight: 500

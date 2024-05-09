@@ -1,10 +1,19 @@
 // Copyright © 2024 Navarrotech
 
+// Redux
 import { createSlice } from "@reduxjs/toolkit"
 
 // Typescript
 import type { PayloadAction } from "@reduxjs/toolkit"
 import type { MealType, PlannedMeal, Recipe } from "@/types"
+
+// Utility
+import moment from "moment"
+
+type SelectedDropzone = {
+    date: typeof moment
+    type: MealType
+}
 
 export type State = {
     byId: Record<string, Recipe>
@@ -13,12 +22,14 @@ export type State = {
     draggingRecipe: Recipe | null
     draggingMeal: PlannedMeal | null
     selectedMeal: PlannedMeal | null
+    selectedDropzone: null | SelectedDropzone
 }
 
 const initialState: State = {
     draggingRecipe: null,
     draggingMeal: null,
     selectedMeal: null,
+    selectedDropzone: null,
     byType: {
         breakfast: [],
         lunch: [],
@@ -66,6 +77,10 @@ const slice = createSlice({
         state.selectedMeal = action.payload
         return state
     },
+    setSelectedDropzone(state, action: PayloadAction<SelectedDropzone | null>){
+        state.selectedDropzone = action.payload
+        return state
+    },
     resetRecipes: () => initialState,
   }
 })
@@ -76,6 +91,7 @@ export const {
     setDraggingRecipe,
     setDraggingMeal,
     selectMeal,
+    setSelectedDropzone,
 } = slice.actions
 
 export default slice;

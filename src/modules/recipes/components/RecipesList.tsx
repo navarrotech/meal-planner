@@ -20,6 +20,10 @@ import styles from "../recipe.module.sass";
 import EditRecipe from "./EditRecipe";
 import Button from "@/common/Button";
 
+type Props = {
+    onClick?: (recipe: Recipe) => void
+}
+
 type State = {
     search: string
     selectedRecipe: Recipe | null
@@ -30,7 +34,7 @@ const initialState: State = {
     selectedRecipe: null
 }
 
-export default function RecipesList(){
+export default function RecipesList(props: Props){
     const [ state, setState ] = useState<State>(initialState)
 
     const { byType, keys } = useRecipes(
@@ -63,10 +67,11 @@ export default function RecipesList(){
                 <p>{ title }</p>
                 {
                 recipes.map(recipe => <div
-                    draggable
+                    draggable={!props.onClick}
                     id={recipe.id}
                     key={recipe.id}
                     className={styles.recipeListItem}
+                    onClick={() => props.onClick?.(recipe)}
                     onDragStart={() => {
                         dispatch(
                             setDraggingRecipe(recipe)
@@ -78,6 +83,9 @@ export default function RecipesList(){
                         )
                     }}
                     onDoubleClick={() => {
+                        if (props.onClick){
+                            return;
+                        }
                         setState({
                             ...state,
                             selectedRecipe: recipe
@@ -85,19 +93,22 @@ export default function RecipesList(){
                     }}
                 >
                     <h2>{ recipe.title }</h2>
-                    <Button
-                        className="is-small is-dark"
-                        onClick={() => {
-                            setState({
-                                ...state,
-                                selectedRecipe: recipe
-                            })
-                        }}
-                    >
-                        <span className="icon">
-                            <FontAwesomeIcon icon={faEdit} />
-                        </span>
-                    </Button>
+                    { !props.onClick
+                        ? <Button
+                            className="is-small is-dark"
+                            onClick={() => {
+                                setState({
+                                    ...state,
+                                    selectedRecipe: recipe
+                                })
+                            }}
+                        >
+                            <span className="icon">
+                                <FontAwesomeIcon icon={faEdit} />
+                            </span>
+                        </Button>
+                        : <></>
+                    }
                 </div>)
             }</>
         }
@@ -116,6 +127,7 @@ export default function RecipesList(){
     const searchInput = <div className="field">
         <div className="control has-icons-left">
             <input
+                autoFocus={!!props.onClick}
                 className="input"
                 type="text"
                 value={state.search}

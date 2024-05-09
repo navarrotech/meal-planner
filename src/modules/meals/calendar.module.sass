@@ -12,13 +12,17 @@
     margin: 0 4px
     padding: 1.2em 0.5em
 
+    cursor: pointer
     font-size: 0.8rem
+
+    &:hover
+        border-color: $primary
 
     &:not(:last-child)
         margin-bottom: 1em
 
     &.hoveredOver
-        border-color: $primary
+        background: $primary
 
     > p
         position: absolute

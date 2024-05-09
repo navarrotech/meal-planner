@@ -17,12 +17,19 @@ export default function Layout(){
         }
 
         return <>
-            <h1 className="title is-capitalized mb-0">{ key }</h1>
-            <hr className="mt-3 mb-2" />
-            <div className={styles.mealGroup}>{
+            <div className={"block " + styles.mealGroup}>
+                <h1 className={"title is-capitalized " + styles.groupTitle}>
+                    <span>{ key }</span>    
+                </h1>{
                 todaysMeals[key].map((meal) => {
                     const recipe = recipesById[meal.recipeId]
-                    return <div key={meal.id} className={"block " + styles.meal}>
+                    return <div
+                        key={meal.id}
+                        className={styles.meal}
+                        style={{
+                            height: `calc(82vh / ${todaysMeals.all.length})`
+                        }}
+                    >
                         {/* Cover */}
                         <div
                             className={styles.cover}
@@ -32,7 +39,10 @@ export default function Layout(){
                         />
                         {/* Title */}
                         <div className={"block " + styles.titles}>
-                            <h3 className="is-size-4">{ recipe.title }</h3>
+                            <h3 className="is-size-4 is-capitalized">
+                                <strong>{ meal.forWho ? `${meal.forWho}: ` : '' }</strong>
+                                <span className="has-font-weight-normal">{ recipe.title }</span>
+                            </h3>
                             <p>{ recipe.details }</p>
                             <p>{ meal.notes }</p>
                         </div>

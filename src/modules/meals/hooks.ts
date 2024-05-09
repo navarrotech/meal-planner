@@ -34,6 +34,7 @@ export function useMealPlans(year: string, month: string, startDay: string, type
 
 export function useTodaysMeals(){
     const [ meals, setMeals ] = useState<PlannedDayGroup>({
+        all: [],
         breakfast: [],
         lunch: [],
         dinner: []
@@ -51,6 +52,7 @@ export function useTodaysMeals(){
                 // Some small re-structuring to make it easier to work with
 
                 const grouping: PlannedDayGroup = {
+                    all: [],
                     breakfast: [],
                     lunch: [],
                     dinner: []
@@ -58,12 +60,15 @@ export function useTodaysMeals(){
 
                 data.breakfast && Object.values(data.breakfast).forEach((meal) => {
                     grouping.breakfast.push(meal);
+                    grouping.all.push(meal);
                 })
                 data.lunch && Object.values(data.lunch).forEach((meal) => {
                     grouping.lunch.push(meal);
+                    grouping.all.push(meal);
                 })
                 data.dinner && Object.values(data.dinner).forEach((meal) => {
                     grouping.dinner.push(meal);
+                    grouping.all.push(meal);
                 })
 
                 setMeals(grouping);

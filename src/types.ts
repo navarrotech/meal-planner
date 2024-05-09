@@ -21,6 +21,7 @@ export type PlannedMeal = {
 }
 
 export type PlannedDayGroup = {
+    all: PlannedMeal[],
     breakfast: PlannedMeal[],
     lunch: PlannedMeal[],
     dinner: PlannedMeal[]

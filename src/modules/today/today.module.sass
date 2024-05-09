@@ -3,12 +3,32 @@
 .today
 
     .mealGroup
+        position: relative
+
+        .groupTitle
+            position: absolute
+            margin: 0 !important
+            top: 0
+            bottom: 0
+            left: -3.3em
+
+            user-select: none
+
+            width: 160px
+
+            display: flex
+            align-items: center
+            justify-content: center
+
+            span
+                display: block
+                transform: rotate(-90deg)
+                transform-origin: 0, 0
 
         .meal
             display: flex
             justify-content: space-between
             align-items: center
-            height: calc(100vh / 15)
 
             .cover
                 height: 100%
@@ -26,7 +46,7 @@
                 height: 100%
                 width: 33%
 
-            &:first-child .cover
+            &:nth-child(2) .cover
                 border-top-left-radius: 6px
                 border-top-right-radius: 6px
             

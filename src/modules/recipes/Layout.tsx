@@ -37,7 +37,7 @@ export default function RecipeLayout() {
     return <section className="section">
         <div className="container is-max-fullhd">
             <div className="level">
-                <h1 className="title is-size-3">Recipes</h1>
+                <h1 className="title is-size-3 mb-0">Recipes</h1>
                 <div className="block buttons is-right">
                     <AddRecipe />
                 </div>
@@ -71,15 +71,17 @@ type RecipeCardProps = {
     onClick?: (recipe: Recipe) => void
 }
 
-function RecipeCard({ recipe, onClick }: RecipeCardProps){
+function RecipeCard({ recipe, onClick }: RecipeCardProps) {
     return <div key={recipe.id} className={styles.recipeCard} onClick={() => onClick?.(recipe)}>
         <div
             className={styles.media}
-            style={{ backgroundImage: `url(${recipe.image || "/placeholder.jpg"})` }}
+            style={{
+                backgroundImage: `url(${recipe.image || "/placeholder.jpg"})`
+            }}
         />
         <div className={styles.titles}>
-            <p className="title is-6">{ recipe.title }</p>
-            <p className="subtitle is-7">{ recipe.details }</p>
+            <p className="title is-size-6">{ recipe.title }</p>
+            <p className="subtitle is-size-7">{ recipe.details }</p>
         </div>
     </div>
 }

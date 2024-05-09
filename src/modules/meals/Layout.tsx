@@ -9,6 +9,7 @@ import moment from 'moment'
 // Components
 import EditPlannedMeal from "./components/EditPlannedMeal";
 import RecipeList from "@/modules/recipes/components/RecipesList";
+import AddToDropzone from "./components/AddToDropzone";
 import AddRecipe from "../recipes/components/AddRecipe";
 import Dropzone from "./components/Dropzone";
 import Button from "@/common/Button";
@@ -18,19 +19,20 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import styles from './calendar.module.sass'
 
-const daysArray = Array.apply(0, Array(7))
+const isMobile = () => window.innerWidth < 768
+const getDayCount = () => isMobile() ? 1 : 7
 
 export default function MealPlanLayout(){
     
-    const [ date, setDate ] = useState<typeof moment>( moment().startOf("week") )
-    const lastDayOfWeek = date.clone().add(6, 'days')
+    const [ date, setDate ] = useState<typeof moment>( moment().startOf(isMobile() ? "day" : "week") )
+    const lastDayOfWeek = date.clone().add(getDayCount() - 1, 'days')
 
     return <section className="section">
         <div className={"container " + styles.container}>
             <div className="block columns">
-                
+
                 {/* Known meal choosers */}
-                <div className="column is-one-fifth">
+                <div className="column is-one-fifth is-hidden-touch">
                     <div className="block box">
                         <RecipeList />
                     </div>
@@ -40,21 +42,35 @@ export default function MealPlanLayout(){
                 {/* Calendar */}
                 <div className="column is-four-fifths">
                     <div className="block box">
-                        <div className="block level">
-                            <h1 className="title">
+                        <div className="block level not-mobile">
+                            <h1 className={`title is-size-3 has-text-centered-mobile`}>
                                 <span>{ date.format("MMMM Do") }</span>
-                                <span className="icon is-small px-4 mx-1">
-                                    <FontAwesomeIcon icon={faArrowRight} size="xs" />
-                                </span>
-                                <span>{ lastDayOfWeek.format("MMMM Do YYYY") }</span>
+                                {
+                                    !isMobile()
+                                    ? <>
+                                        <span className="icon is-small px-4 mx-1">
+                                            <FontAwesomeIcon icon={faArrowRight} size="xs" />
+                                        </span>
+                                        <span>{ lastDayOfWeek.format("MMMM Do YYYY") }</span>
+                                    </>
+                                    : <>
+                                        <br />
+                                        <span className="is-size-5 has-text-weight-normal">{ lastDayOfWeek.format("dddd") }</span>
+                                        {
+                                            date.isSame(new Date(), "day")
+                                                ? <span className="tag is-primary ml-2">Today</span>
+                                                : <></>
+                                        }
+                                    </>
+                                }
                             </h1>
-                            <div className="block buttons is-right has-addons">
-                                <Button onClick={() => setDate(date.clone().subtract(7, 'days'))}>
+                            <div className="block buttons is-right has-addons is-centered-mobile">
+                                <Button onClick={() => setDate(date.clone().subtract(getDayCount(), 'days'))}>
                                     <span className="icon">
                                         <FontAwesomeIcon icon={faArrowLeft} />
                                     </span>
                                 </Button>
-                                <Button onClick={() => setDate(date.clone().add(7, 'days'))}>
+                                <Button onClick={() => setDate(date.clone().add(getDayCount(), 'days'))}>
                                     <span className="icon">
                                         <FontAwesomeIcon icon={faArrowRight} />
                                     </span>
@@ -63,7 +79,7 @@ export default function MealPlanLayout(){
                         </div>
                         <div className="block pt-3">
                             <div className="block columns is-gapless">{
-                                daysArray.map((_, index) => {
+                                Array.apply(0, Array(getDayCount())).map((_, index) => {
                                     const day: typeof moment = date.clone().add(index, 'days')
 
                                     const isToday = day.isSame(moment(), 'day')
@@ -73,11 +89,11 @@ export default function MealPlanLayout(){
                                         className={"column " + (isPast ? "is-disabled" : "")}
                                         key={index + day.toISOString()}
                                     >
-                                        <div className="has-text-centered">
+                                        <div className="has-text-centered is-hidden-touch">
                                             <h1 className={`title is-size-5 ${(isToday ? " has-text-primary has-text-weight-bold" : "")}`}>{ day.format("MMMM Do") }</h1>
                                             <h2 className={`subtitle is-size-6 ${(isToday ? " has-text-primary has-text-weight-bold" : "")}`}>{ day.format("dddd") }</h2>
                                         </div>
-                                        <hr />
+                                        <hr className="is-hidden-touch" />
                                         <div>
                                             <Dropzone date={day} type="breakfast" />
                                             <Dropzone date={day} type="lunch" />
@@ -93,5 +109,6 @@ export default function MealPlanLayout(){
             </div>
         </div>
         <EditPlannedMeal />
+        <AddToDropzone />
     </section>
 }
