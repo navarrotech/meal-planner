@@ -12,6 +12,9 @@
     justify-content: center
     align-items: center
 
+    border-radius: 6px
+    overflow: hidden
+
     :global(.buttons)
         opacity: 0
         transition: opacity 200ms ease
@@ -34,7 +37,8 @@
         transition: width 100ms ease, opacity 1s ease
 
 .recipeList
-    max-height: calc(90vh - 100px)
+    max-height: calc(80vh - 100px)
+    padding-right: 0.6em
     overflow-y: auto
 
     .recipeListItem
@@ -42,19 +46,25 @@
         align-items: center
         justify-content: space-between
 
-        padding: 0.5em 0.5em 0.5em 0.8em
+        padding: 0.1em 0.3em 0.1em 0.5em
         background: color.adjust($dark, $lightness: 10%)
-        font-size: 0.9rem
-        border-radius: 6px
+        font-size: 0.85rem
+        border-radius: 4px
 
         transition: background 200ms ease
         cursor: pointer
 
+        &:not(:hover)
+            :global(.button)
+                opacity: 0
+
         &:not(:last-child)
-            margin-bottom: 0.6em
+            margin-bottom: 0.3em
 
         :global(.button)
+            font-size: 0.7rem
             transition: background 200ms ease
+
             &:not(:hover)
                 background: color.adjust($dark, $lightness: 5%) !important
 
@@ -66,3 +76,32 @@
 
                 &:hover
                     background: color.adjust($primary, $lightness: -15%) !important
+
+.recipeLayout
+    display: flex !important
+    flex-direction: row
+    align-items: flex-start
+    justify-content: flex-start
+    flex-wrap: wrap
+
+    gap: 1em
+
+    .recipeCard
+        width: calc(20% - 1em)
+        transition: transform 200ms ease
+        cursor: pointer
+
+        &:hover
+            transform: scale(1.05)
+
+        .media
+            height: 130px
+            background-repeat: no-repeat
+            background-size: cover
+            background-position: center
+
+            border-radius: 6px
+            overflow: hidden
+
+        .titles
+            margin-top: 0.3em

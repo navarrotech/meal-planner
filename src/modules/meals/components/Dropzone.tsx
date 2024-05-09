@@ -5,7 +5,7 @@ import { useState } from "react";
 
 // Redux
 import { dispatch, useSelector, getState } from "@/store";
-import { setDraggingRecipe, setDraggingMeal } from "@/modules/recipes/reducer";
+import { setDraggingRecipe, setDraggingMeal, selectMeal } from "@/modules/recipes/reducer";
 
 // Utility
 import moment from "moment";
@@ -59,7 +59,13 @@ export default function Dropzone({ date, type }: Props) {
 
                 const draggedRecipe = recipesById[draggingMeal.recipeId]
                 if (draggedRecipe){
-                    createMealPlanFromRecipe(date, type, draggedRecipe)
+                    createMealPlanFromRecipe(
+                        date,
+                        type,
+                        draggedRecipe,
+                        draggingMeal.forWho,
+                        draggingMeal.notes
+                    )
                 }
                 return;
             }
@@ -84,9 +90,10 @@ export default function Dropzone({ date, type }: Props) {
                     key={key}
                     draggable
                     className={`${styles.plannedMeal} ${isBeingReDragged === meal.id ? styles.reDragged : ''}`}
-                    onDoubleClick={() => {
-                        // TODO
-                        console.log("Double clicked! Time to edit me.")
+                    onClick={() => {
+                        dispatch(
+                            selectMeal(meal)
+                        )
                     }}
                     onDragStart={() => {
                         dispatch(
@@ -103,9 +110,16 @@ export default function Dropzone({ date, type }: Props) {
                         )
                         setReDragged("")
                     }}
-                >{
-                    recipe ? recipe.title : "Recipe not found"
-                }</div>
+                >
+                    { meal.forWho
+                        ? <>    
+                            <strong className="is-hidden-desktop">{ meal.forWho.slice(0, 1) }: </strong>
+                            <strong className="is-hidden-touch">{ meal.forWho }: </strong>
+                        </>
+                        : <></>
+                    }
+                    <span>{ recipe ? recipe.title : "Recipe not found" }</span>
+                </div>
             })
         }</div>
     </div>

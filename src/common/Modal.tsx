@@ -50,7 +50,7 @@ export default function Modal(props: ModalProps) {
             <div className="modal-card">
                 <header className="modal-card-head">
                     <p className="modal-card-title">{ title }</p>
-                    <button className="delete is-medium" onClick={onClose}></button>
+                    <button className="delete is-large" onClick={onClose}></button>
                 </header>
                 <section className="modal-card-body">{
                     children

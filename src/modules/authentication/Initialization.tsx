@@ -9,6 +9,9 @@ import { dispatch, useSelector } from "@/store";
 import { finishInit, setUser } from "@/modules/authentication/reducer";
 import { initialize, reset } from "@/store/action";
 
+// Components
+import Loader from "@/common/Loader";
+
 type Props = {
     children: ReactNode
 }
@@ -37,7 +40,7 @@ export default function Initialization({ children }: Props){
     }, [])
 
     if (isLoading){
-        return <></>
+        return <Loader/>
     }
 
     return children

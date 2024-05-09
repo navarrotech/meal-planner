@@ -1,7 +1,11 @@
 // Copyright © 2024 Navarrotech
 
-import type { Recipe } from "@/types";
+import type { MealType, Recipe } from "@/types";
 import { v4 as uuid } from "uuid";
+
+const storageEngine = localStorage;
+export const getLastCreatedRecipeTypeUsed = () => storageEngine.getItem("lastCreatedRecipeTypeUsed") as MealType || "dinner";
+export const saveLastCreatedRecipeTypeUsed = (type: MealType) => storageEngine.setItem("lastCreatedRecipeTypeUsed", type);
 
 export function makeNewRecipe(): Recipe {
     return {
@@ -12,7 +16,7 @@ export function makeNewRecipe(): Recipe {
         details: "",
         instructions: "",
 
-        type: "dinner",
+        type: getLastCreatedRecipeTypeUsed(),
         
         ingredients: [],
         tags: [],

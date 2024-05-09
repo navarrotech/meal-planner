@@ -1,5 +1,7 @@
 // Copyright © 2024 Navarrotech
 
+import { MealTypesArray } from '../meals/validators';
+
 import * as yup from 'yup';
 
 export const tagSchema = () => yup.string().typeError("Tag must be a string").max(32, "Tag must be at most 32 characters");
@@ -38,7 +40,7 @@ export const recipeSchema = yup
 
         type: yup
             .string()
-            .oneOf(["breakfast", "lunch", "dinner", "snack"], "Invalid meal type")
+            .oneOf(MealTypesArray, "Invalid meal type")
             .required(),
 
         ingredients: yup
@@ -52,4 +54,4 @@ export const recipeSchema = yup
             .max(32, "No more than 32 tags")
             .default([]),
     })
-    .noUnknown("Invalid recipe keys")
+    .noUnknown("Invalid keys provided")

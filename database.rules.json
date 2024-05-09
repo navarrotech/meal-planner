@@ -1,6 +1,28 @@
 {
   "rules": {
-    ".read": "now < 1717653600000",  // 2024-6-6
-    ".write": "now < 1717653600000",  // 2024-6-6
+    "meals": {
+      ".read": "auth !== null",
+      ".write": "auth !== null",
+      "$year": {
+        "$month": {
+          "$day": {
+            "$mealType": {
+              "$mealId": {
+                ".read": "auth !== null",
+                ".write": "auth !== null"
+              }
+            }
+          }
+        }
+      }
+    },
+    "recipes": {
+      ".read": "auth !== null",
+      ".write": "auth !== null",
+      "$recipeId": {
+        ".read": "auth !== null",
+        ".write": "auth !== null"
+      }
+    }
   }
 }

@@ -33,7 +33,6 @@ $modal-card-head-background-color: $dark
 $tabs-boxed-link-radius: $radius !default
 $tabs-boxed-link-hover-background-color: $background !default
 $tabs-boxed-link-hover-border-bottom-color: $primary !default
-
 $tabs-boxed-link-active-background-color: $primary !default
 $tabs-boxed-link-active-border-color: $primary 
 $tabs-boxed-link-active-border-bottom-color: transparent !default
@@ -48,7 +47,7 @@ $button-active-color: white
 $button-text-hover-color: white
 $button-text-color: white
 
-$scheme-invert: $white
+$text-strong: white
 
 $tabs-toggle-link-border-color: $primary 
 $tabs-toggle-link-border-style: solid !default
@@ -97,6 +96,20 @@ html
         &:hover
             background: $primary !important
             color: white !important
+
+.navbar
+    a.navbar-item
+        &:hover
+            background: color.adjust($primary, $lightness: 10%)
+            color: white
+
+        &.is-selected
+            background: $primary
+            color: white
+
+.column
+    &.is-disabled
+        opacity: 0.5
 
 .react-numeric-input
     width: 100%

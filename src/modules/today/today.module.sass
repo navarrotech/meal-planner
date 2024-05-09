@@ -1,0 +1,35 @@
+// Copyright © 2024 Navarrotech
+
+.today
+
+    .mealGroup
+
+        .meal
+            display: flex
+            justify-content: space-between
+            align-items: center
+            height: calc(100vh / 15)
+
+            .cover
+                height: 100%
+                width: 33%
+                background-size: cover
+                background-position: center
+                overflow: hidden
+
+            .titles
+                padding: 0.5em 0
+                height: 100%
+                width: 33%
+
+            .health
+                height: 100%
+                width: 33%
+
+            &:first-child .cover
+                border-top-left-radius: 6px
+                border-top-right-radius: 6px
+            
+            &:last-child .cover
+                border-bottom-left-radius: 6px
+                border-bottom-right-radius: 6px

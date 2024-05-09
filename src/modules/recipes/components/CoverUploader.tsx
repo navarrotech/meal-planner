@@ -4,11 +4,11 @@
 import { useState, useRef } from 'react'
 
 // Utility
-import { uploadImageToCloud } from '../actions'
+import { uploadImageToCloud, removeImageFromCloud } from '../actions'
 
 // Iconography & styling
-import { faLink, faUpload } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLink, faUpload } from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import styles from '../recipe.module.sass'
 
 // Components
@@ -25,12 +25,26 @@ export default function CoverUploader({ image, onChange, disabled = false }: Pro
     const [ uploading, setUploading ] = useState<boolean>(false)
     const [ progress, setProgress ] = useState<number>(0)
 
-    const fileInput = useRef<HTMLInputElement>(null);
+    const fileInput = useRef<HTMLInputElement>(null)
 
     return <div
         className={"block " + styles.cover}
         style={{
             backgroundImage: `url(${image || "/placeholder.jpg"})`
+        }}
+        onDragOver={(e) => {
+            e.preventDefault()
+        }}
+        onDrop={(e) => {
+            e.preventDefault()
+            try {
+                e?.nativeEvent?.dataTransfer?.items[0].getAsString(function(url){
+                    console.log(url)
+                    onChange(url)
+                })
+            } catch (e) {
+                console.error(e)
+            }
         }}
     >
         <input
@@ -42,13 +56,21 @@ export default function CoverUploader({ image, onChange, disabled = false }: Pro
             ref={fileInput}
             onChange={async ({ target: { files } }) => {
                 if (!files){
-                    return;
+                    return
                 }
 
                 setUploading(true)
 
                 try {
                     const imageUrl = await uploadImageToCloud(files[0], setProgress)
+                    // Delete the old image from the cloud if it's been changed out
+                    if (image && imageUrl !== image){
+                        try {
+                            removeImageFromCloud(image)
+                        } catch (e){
+                            console.error(e)
+                        }
+                    }
                     if (imageUrl){
                         onChange(imageUrl)
                     }
@@ -72,9 +94,9 @@ export default function CoverUploader({ image, onChange, disabled = false }: Pro
                 color="dark"
                 disabled={uploading || disabled}
                 onClick={() => {
-                    const url = prompt("Enter the URL of the image");
+                    const url = prompt("Enter the URL of the image")
                     if (url){
-                        onChange(url);
+                        onChange(url)
                     }
                 }}
             >
@@ -87,7 +109,7 @@ export default function CoverUploader({ image, onChange, disabled = false }: Pro
                 color="primary"
                 loading={uploading || disabled}
                 onClick={() => {
-                    fileInput.current?.click();
+                    fileInput.current?.click()
                 }}
             >
                 <span className="icon">

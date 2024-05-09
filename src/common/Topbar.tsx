@@ -34,7 +34,26 @@ export default function Topbar() {
             </div>
 
             <div className="navbar-menu">
-                <div className="navbar-start" />
+                <div className="navbar-start">
+                    <NavLink
+                        className={({ isActive }) => `navbar-item ${isActive ? 'is-selected' : ''}`}
+                        to="/dashboard/today"
+                    >
+                        Today
+                    </NavLink>
+                    <NavLink
+                        className={({ isActive }) => `navbar-item ${isActive ? 'is-selected' : ''}`}
+                        to="/dashboard/meals"
+                    >
+                        Meal Planner
+                    </NavLink>
+                    <NavLink
+                        className={({ isActive }) => `navbar-item ${isActive ? 'is-selected' : ''}`}
+                        to="/dashboard/recipes"
+                    >
+                        Recipes
+                    </NavLink>
+                </div>
 
                 <div className="navbar-end">
                     <div className="navbar-item">

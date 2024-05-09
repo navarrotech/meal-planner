@@ -67,7 +67,7 @@ export default function AddRecipe() {
         </Button>
         <Modal
             show={showModal}
-            title="Add Recipe"
+            title="Add A New Recipe"
             onClose={() => setShowModal(false)}
             actions={[
                 {

@@ -7,6 +7,7 @@ import { useState } from "react";
 import moment from 'moment'
 
 // Components
+import EditPlannedMeal from "./components/EditPlannedMeal";
 import RecipeList from "@/modules/recipes/components/RecipesList";
 import AddRecipe from "../recipes/components/AddRecipe";
 import Dropzone from "./components/Dropzone";
@@ -15,20 +16,21 @@ import Button from "@/common/Button";
 // Iconography & styles
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import styles from './calendar.module.sass'
 
 const daysArray = Array.apply(0, Array(7))
 
-export default function VideoLayout(){
+export default function MealPlanLayout(){
     
     const [ date, setDate ] = useState<typeof moment>( moment().startOf("week") )
     const lastDayOfWeek = date.clone().add(6, 'days')
 
     return <section className="section">
-        <div className="container is-fluid">
+        <div className={"container " + styles.container}>
             <div className="block columns">
                 
                 {/* Known meal choosers */}
-                <div className="column is-one-quarters">
+                <div className="column is-one-fifth">
                     <div className="block box">
                         <RecipeList />
                     </div>
@@ -36,7 +38,7 @@ export default function VideoLayout(){
                 </div>
 
                 {/* Calendar */}
-                <div className="column is-three-quarters">
+                <div className="column is-four-fifths">
                     <div className="block box">
                         <div className="block level">
                             <h1 className="title">
@@ -63,13 +65,17 @@ export default function VideoLayout(){
                             <div className="block columns is-gapless">{
                                 daysArray.map((_, index) => {
                                     const day: typeof moment = date.clone().add(index, 'days')
+
+                                    const isToday = day.isSame(moment(), 'day')
+                                    const isPast = day.isBefore(moment(), 'day')
+
                                     return <div
-                                        className="column"
+                                        className={"column " + (isPast ? "is-disabled" : "")}
                                         key={index + day.toISOString()}
                                     >
                                         <div className="has-text-centered">
-                                            <h1 className="title is-size-5">{ day.format("MMMM Do") }</h1>
-                                            <h2 className="subtitle is-size-6">{ day.format("dddd") }</h2>
+                                            <h1 className={`title is-size-5 ${(isToday ? " has-text-primary has-text-weight-bold" : "")}`}>{ day.format("MMMM Do") }</h1>
+                                            <h2 className={`subtitle is-size-6 ${(isToday ? " has-text-primary has-text-weight-bold" : "")}`}>{ day.format("dddd") }</h2>
                                         </div>
                                         <hr />
                                         <div>
@@ -86,5 +92,6 @@ export default function VideoLayout(){
                 
             </div>
         </div>
+        <EditPlannedMeal />
     </section>
 }

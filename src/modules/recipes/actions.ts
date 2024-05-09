@@ -1,31 +1,31 @@
 // Copyright © 2024 Navarrotech
 
 // Typescript
-import type { Recipe } from "@/types";
+import type { Recipe } from "@/types"
 
 // Firebase
-import { type Unsubscribe } from '@/firebase';
-import { getDownloadURL, uploadBytesResumable } from "firebase/storage";
-import { recipesListRef, recipeRef, recipeCoverRef } from './references';
-import { onValue, remove, set } from 'firebase/database';
+import { type Unsubscribe } from '@/firebase'
+import { deleteObject, getDownloadURL, uploadBytesResumable } from "firebase/storage"
+import { recipesListRef, recipeRef, recipeCoverRef } from './references'
+import { onValue, remove, set } from 'firebase/database'
 
 // Utility
-import { v4 as uuid } from "uuid";
+import { v4 as uuid } from "uuid"
 
 // Redux
-import { dispatch } from "@/store";
-import { setRecipes, resetRecipes } from "./reducer";
+import { dispatch } from "@/store"
+import { setRecipes, resetRecipes } from "./reducer"
 
 // Constants
-import { maxImageFileSize } from './constants';
+import { maxImageFileSize } from './constants'
 
-let unsubscribe: Unsubscribe | undefined;
+let unsubscribe: Unsubscribe | undefined
 export function startRecipes(){
     unsubscribe?.()
     unsubscribe = onValue(
         recipesListRef(),
         (snapshot) => {
-            const data = snapshot.val();
+            const data = snapshot.val()
             dispatch(
                 setRecipes(data || {})
             )
@@ -43,7 +43,7 @@ export function stopRecipes(){
 export async function uploadImageToCloud(file: File, progressCallback?: (progress: number) => void): Promise<string> {
 
     if (!file){
-        return '';
+        return ''
     }
 
     // Max file size check
@@ -53,33 +53,48 @@ export async function uploadImageToCloud(file: File, progressCallback?: (progres
             fileSize: file.size,
             maxImageFileSize,
             oversize: (file.size / maxImageFileSize) * 100
-        });
-        return '';
+        })
+        return ''
     }
 
-    const storageRef = recipeCoverRef(`${uuid()}-${file.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
+    const storageRef = recipeCoverRef(`${uuid()}-${file.name}`)
+    const uploadTask = uploadBytesResumable(storageRef, file)
 
     return new Promise((accept, reject) => {
         uploadTask.on('state_changed', 
             (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log('Upload is ' + progress + '% done');
-                progressCallback?.(progress);
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                console.log('Upload is ' + progress + '% done')
+                progressCallback?.(progress)
 
                 switch (snapshot.state) {
                     case 'paused':
-                        console.log('Upload is paused');
-                        break;
+                        console.log('Upload is paused')
+                        break
                     case 'running':
-                        console.log('Upload is running');
-                        break;
+                        console.log('Upload is running')
+                        break
                 }
             }, 
             (error) => reject(error), 
             () => getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => accept(downloadURL))
-        );
+        )
     })
+}
+
+export async function removeImageFromCloud(image: string) {
+    const url = new URL(
+        decodeURI(image)
+    )
+
+    if (url.hostname !== 'firebasestorage.googleapis.com'){
+        return console.log("Not removing image from cloud, as it's not a firebase url", url)
+    }
+
+    const path = decodeURIComponent(url.pathname.split('/o/')[1])
+
+    const storageRef = recipeCoverRef(path.replace('recipes/images/', ''))
+    await deleteObject(storageRef)
 }
 
 export function saveRecipe(recipe: Recipe): Promise<void> {

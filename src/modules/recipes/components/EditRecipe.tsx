@@ -8,7 +8,7 @@ import type { Recipe } from "@/types";
 
 // Utility
 import { recipeSchema } from "../validators";
-import { saveRecipe, deleteRecipe } from "../actions";
+import { saveRecipe, deleteRecipe, removeImageFromCloud } from "../actions";
 
 // Components
 import RecipeModalBody from "./RecipeModalBody";
@@ -35,17 +35,34 @@ export default function EditRecipe({ recipe: initialRecipe, onClose }: Props) {
                 setIsValid(false)
             })
 
-    }, [ recipe ])
+        // Delete any images that were uploaded but not saved
+        function onPageUnload(){
+            if (initialRecipe.image !== recipe.image){
+                removeImageFromCloud(recipe.image).catch(console.error)
+            }
+        }
+
+        window.addEventListener("beforeunload", onPageUnload)
+
+        return () => {
+            window.removeEventListener("beforeunload", onPageUnload)
+        }
+    }, [ recipe, initialRecipe.image ])
 
     return <Modal
         show
-        title="Add Recipe"
+        title="Edit Recipe"
         onClose={onClose}
         actions={[
             {
                 text: "Cancel",
                 color: "default",
-                closeAfterOnClick: true
+                closeAfterOnClick: true,
+                onClick: () => {
+                    if (initialRecipe.image !== recipe.image){
+                        removeImageFromCloud(recipe.image).catch(console.error)
+                    }
+                }
             },
             {
                 loading,
@@ -54,7 +71,8 @@ export default function EditRecipe({ recipe: initialRecipe, onClose }: Props) {
                 closeAfterOnClick: true,
                 onClick: async () => {
                     setLoading(true)
-                    await deleteRecipe(recipe)
+                    await deleteRecipe(recipe).catch(console.error)
+                    removeImageFromCloud(recipe.image).catch(console.error)
                     setLoading(false)
                 }
             },

@@ -1,18 +1,18 @@
 // Copyright © 2024 Navarrotech
 
 // Typescript
-import type { Recipe } from "@/types";
+import type { MealType, Recipe } from "@/types";
 
 // Redux
 import { useSelector } from "@/store";
 
 export function useRecipes(
     searchTitleTextFilter?: string,
-    filterCategories?: string[],
     filterTags?: string[],
     filterWantedIngredients?: string[],
     filterUnwantedIngredients?: string[],
 ){
+    const byType = useSelector(state => state.recipes.byType)
     const keys = useSelector(state => state.recipes.keys)
     const byId = useSelector(state => state.recipes.byId)
 
@@ -25,15 +25,6 @@ export function useRecipes(
             return recipe.title.toLowerCase().includes(searchTitleTextFilter.toLowerCase());
         });
     }
-
-    // Filter by categories if provided
-    if (filterCategories && filterCategories.length > 0) {
-        filteredKeys = filteredKeys.filter(key => {
-            const recipe = byId[key];
-            return recipe.categories.some(category => filterCategories.includes(category));
-        });
-    }
-
     // Filter by tags if provided
     if (filterTags && filterTags.length > 0) {
         filteredKeys = filteredKeys.filter(key => {
@@ -64,8 +55,16 @@ export function useRecipes(
         filteredById[key] = byId[key];
     });
 
+    const typeKeys = Object.keys(byType) as MealType[]
+    const byTypeFiltered = {} as Record<MealType, Recipe[]>;
+
+    typeKeys.forEach(type => {
+        byTypeFiltered[type] = byType[type].filter(recipe => filteredKeys.includes(recipe.id));
+    })
+
     return {
         keys: filteredKeys,
         byId: filteredById,
+        byType: byTypeFiltered,
     };
 }

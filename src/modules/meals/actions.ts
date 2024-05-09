@@ -11,13 +11,15 @@ import { makeNewMealPlan } from "./constants"
 import { mealsSetRef } from "./references"
 import { remove, set } from "firebase/database"
 
-export async function createMealPlanFromRecipe(date: typeof moment, type: MealType, recipe: Recipe){
+export async function createMealPlanFromRecipe(date: typeof moment, type: MealType, recipe: Recipe, forWho?: string, notes?: string){
     const [ year, month, day ] = date.format("YYYY-MMMM-DD").split("-")
 
     const newMealPlan = makeNewMealPlan(
         recipe,
         type,
-        date
+        date,
+        forWho,
+        notes
     )
 
     set(
@@ -34,11 +36,11 @@ export async function deleteMealPlan(plan: PlannedMeal){
     )
 }
 
-export async function updateMealPlan(date: typeof moment, type: MealType, plan: PlannedMeal){
-    const [ year, month, day ] = date.format("YYYY-MMMM-DD").split("-")
+export async function updateMealPlan(plan: PlannedMeal){
+    const [ year, month, day ] = moment(plan.date).format("YYYY-MMMM-DD").split("-")
 
     set(
-        mealsSetRef(year, month, day, type, plan.id),
+        mealsSetRef(year, month, day, plan.type, plan.id),
         plan
     )
 }

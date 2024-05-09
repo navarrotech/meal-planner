@@ -16,7 +16,11 @@ import store from './store/store'
 // Modules
 import { AuthorizedOutlet } from './modules/authentication/Outlet';
 import * as Auth from './modules/authentication/Forms'
-import VideoManager from './modules/meals/Layout'
+
+// Pages
+import MealPlanLayout from './modules/meals/Layout'
+import RecipeLayout from './modules/recipes/Layout';
+import TodayLayout from './modules/today/Layout';
 
 // Stylesheet
 import "./sass/index.sass"
@@ -35,7 +39,9 @@ root.render(
                     <Route path="/logout" element={<Auth.Logout />} />
                     <Route path="/dashboard" element={<AuthorizedOutlet />}>
                         <Route path="/dashboard" index element={<Navigate to="/dashboard/meals" />} />
-                        <Route path="/dashboard/meals" element={<VideoManager />} />
+                        <Route path="/dashboard/meals" element={<MealPlanLayout />} />
+                        <Route path="/dashboard/recipes" element={<RecipeLayout />} />
+                        <Route path="/dashboard/today" element={<TodayLayout />} />
                     </Route>
                     <Route path="*" element={<Navigate to="/login" />} />
                 </Routes>

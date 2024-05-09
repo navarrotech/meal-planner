@@ -6,6 +6,12 @@ import type { Recipe, MealType } from "@/types";
 // Components
 import CoverUploader from "./CoverUploader";
 
+// Constants
+import {
+    getLastCreatedRecipeTypeUsed,
+    saveLastCreatedRecipeTypeUsed
+} from "../constants";
+
 type Props = {
     recipe: Recipe
     onChange: (recipe: Recipe) => void
@@ -58,13 +64,19 @@ export default function RecipeModalBody({ recipe, onChange, disabled=false }: Pr
                     <select
                         value={recipe.type}
                         className="is-fullwidth"
-                        onChange={({ target: { value } }) => onChange({ ...recipe, type: value as MealType })}
+                        onChange={({ target: { value } }) => {
+                            onChange({ ...recipe, type: value as MealType })
+                            saveLastCreatedRecipeTypeUsed(value as MealType)
+                        }}
                         disabled={disabled}
                     >
                         <option value="breakfast">Breakfast</option>
                         <option value="lunch">Lunch</option>
                         <option value="dinner">Dinner</option>
                         <option value="snack">Snack</option>
+                        <option value="sides">Sides</option>
+                        <option value="restaurants">Restaurants</option>
+                        <option value="drinks">Drinks</option>
                     </select>
                 </div>
             </div>

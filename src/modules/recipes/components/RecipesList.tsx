@@ -33,7 +33,7 @@ const initialState: State = {
 export default function RecipesList(){
     const [ state, setState ] = useState<State>(initialState)
 
-    const { byId, keys } = useRecipes(
+    const { byType, keys } = useRecipes(
         state.search
     );
 
@@ -54,10 +54,15 @@ export default function RecipesList(){
     }
 
     else {
-        content = keys.map(recipeId => {
-            const recipe = byId[recipeId];
-            return (
-                <div
+        function generateRecipeContent(title: String, recipes: Recipe[]) {
+            if (!recipes.length){
+                return <></>
+            }
+
+            return <>
+                <p>{ title }</p>
+                {
+                recipes.map(recipe => <div
                     draggable
                     id={recipe.id}
                     key={recipe.id}
@@ -71,6 +76,12 @@ export default function RecipesList(){
                         dispatch(
                             setDraggingRecipe(null)
                         )
+                    }}
+                    onDoubleClick={() => {
+                        setState({
+                            ...state,
+                            selectedRecipe: recipe
+                        })
                     }}
                 >
                     <h2>{ recipe.title }</h2>
@@ -87,9 +98,19 @@ export default function RecipesList(){
                             <FontAwesomeIcon icon={faEdit} />
                         </span>
                     </Button>
-                </div>
-            )
-        })
+                </div>)
+            }</>
+        }
+    
+        content = <>
+            { generateRecipeContent("Breakfast", byType.breakfast) }
+            { generateRecipeContent("Lunch", byType.lunch) }
+            { generateRecipeContent("Dinner", byType.dinner) }
+            { generateRecipeContent("Snack", byType.snack) }
+            { generateRecipeContent("Sides", byType.sides) }
+            { generateRecipeContent("Drinks", byType.drinks) }
+            { generateRecipeContent("Restaurants", byType.restaurants) }
+        </>
     }
 
     const searchInput = <div className="field">
@@ -114,9 +135,11 @@ export default function RecipesList(){
     </div>
 
     return (
-        <div className={styles.recipeList}>
+        <>
             { (keys.length || state.search) ? searchInput : <></> }
-            { content }
+            <div className={styles.recipeList}>
+                { content }
+            </div>
             { state.selectedRecipe
                 ? <EditRecipe
                     recipe={state.selectedRecipe}
@@ -124,6 +147,6 @@ export default function RecipesList(){
                 />
                 : <></>
             }
-        </div>
+        </>
     )
 }
