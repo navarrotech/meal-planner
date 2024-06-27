@@ -65,15 +65,15 @@ export default function Topbar() {
                     >
                         Recipes
                     </NavLink>
-                    <hr className="navbar-divider" />
+                    <hr className="navbar-divider is-hidden-desktop" />
                     <NavLink
                         to="/account"
-                        className="navbar-item"
+                        className="navbar-item is-hidden-desktop"
                         onClick={() => setShowMobileMenu(false)}
                     >Account (Coming soon)</NavLink>
                     <NavLink
                         to="/logout"
-                        className="navbar-item"
+                        className="navbar-item is-hidden-desktop"
                         onClick={() => setShowMobileMenu(false)}
                     >Logout</NavLink>
                 </div>
