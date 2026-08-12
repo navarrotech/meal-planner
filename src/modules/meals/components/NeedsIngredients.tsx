@@ -121,15 +121,25 @@ export default function NeedsIngredients(props: Props) {
                 </div>
 
                 { unlistedSuggestions.length
-                    ? <div className="tags">
-                        <span className="is-size-7 mr-2">From the recipe:</span>{
-                        unlistedSuggestions.map((ingredient) => <button
-                            type="button"
-                            key={ingredient}
-                            className="tag"
-                            onClick={() => addIngredient(ingredient)}
-                        >+ { ingredient }</button>)
-                    }</div>
+                    ? <>
+                        <p className="is-size-7 mb-2">From the recipe:</p>
+                        {/* Outlined rather than filled, so a suggestion reads as something to
+                            add rather than as something already on the list. A plain Bulma tag
+                            is unreadable here: this theme leaves it near-white on white. */}
+                        <div className="buttons are-small">{
+                            unlistedSuggestions.map((ingredient) => <button
+                                type="button"
+                                key={ingredient}
+                                className="button is-small is-rounded is-warning is-outlined"
+                                onClick={() => addIngredient(ingredient)}
+                            >
+                                <span className="icon is-small">
+                                    <FontAwesomeIcon icon={faPlus} />
+                                </span>
+                                <span>{ ingredient }</span>
+                            </button>)
+                        }</div>
+                    </>
                     : <></>
                 }
             </div>
