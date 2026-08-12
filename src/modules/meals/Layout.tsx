@@ -1,7 +1,10 @@
 // Copyright © 2024 Navarrotech
 
 // React.js
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+
+// Redux
+import { useSelector } from "@/store";
 
 // Data
 import moment from 'moment'
@@ -32,8 +35,54 @@ export default function MealPlanLayout(){
     const [ date, setDate ] = useState<typeof moment>( moment().startOf(isMobile() ? "day" : "week") )
     const [ isShoppingListOpen, setShoppingListOpen ] = useState<boolean>(false)
 
+    // A dialog owns the keyboard while it is open, so the calendar behind it stays put.
+    const selectedMeal = useSelector(state => state.recipes.selectedMeal)
+    const selectedDropzone = useSelector(state => state.recipes.selectedDropzone)
+    const isDialogOpen = Boolean(selectedMeal || selectedDropzone || isShoppingListOpen)
+
     const dayCount = getDayCount()
     const lastDayOfWeek = date.clone().add(dayCount - 1, 'days')
+    const periodName = dayCount > 1 ? "week" : "day"
+
+    // One definition of moving the calendar, shared by the buttons and the arrow keys. The step
+    // is however many days are on screen, so it is a week on a desktop and a day on a phone.
+    const goToAdjacentPeriod = useCallback((direction: 1 | -1) => {
+        setDate((current: typeof moment) => current.clone().add(direction * dayCount, 'days'))
+    }, [ dayCount ])
+
+    useEffect(() => {
+        if (isDialogOpen){
+            return
+        }
+
+        function onKeyDown(event: KeyboardEvent){
+            // A modified arrow is a browser shortcut, not ours.
+            if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey){
+                return
+            }
+
+            // Inside a field an arrow moves the caret, which the user meant and we did not.
+            const target = event.target as HTMLElement | null
+            if (target?.isContentEditable || [ "INPUT", "TEXTAREA", "SELECT" ].includes(target?.tagName || "")){
+                return
+            }
+
+            if (event.key === "ArrowLeft"){
+                event.preventDefault()
+                goToAdjacentPeriod(-1)
+            }
+            else if (event.key === "ArrowRight"){
+                event.preventDefault()
+                goToAdjacentPeriod(1)
+            }
+        }
+
+        window.addEventListener("keydown", onKeyDown)
+
+        return () => {
+            window.removeEventListener("keydown", onKeyDown)
+        }
+    }, [ isDialogOpen, goToAdjacentPeriod ])
 
     // Subscribed once here rather than once per dropzone, and reaching well past the days on
     // screen: the calendar draws the week out of this, and the shopping list reads all of it,
@@ -107,12 +156,22 @@ export default function MealPlanLayout(){
                                     </Button>
                                     : <></>
                                 }
-                                <Button onClick={() => setDate(date.clone().subtract(dayCount, 'days'))}>
+                                <Button
+                                    className="has-tooltip-arrow"
+                                    aria-label={`Previous ${periodName}`}
+                                    data-tooltip={`Previous ${periodName} (←)`}
+                                    onClick={() => goToAdjacentPeriod(-1)}
+                                >
                                     <span className="icon">
                                         <FontAwesomeIcon icon={faArrowLeft} />
                                     </span>
                                 </Button>
-                                <Button onClick={() => setDate(date.clone().add(dayCount, 'days'))}>
+                                <Button
+                                    className="has-tooltip-arrow"
+                                    aria-label={`Next ${periodName}`}
+                                    data-tooltip={`Next ${periodName} (→)`}
+                                    onClick={() => goToAdjacentPeriod(1)}
+                                >
                                     <span className="icon">
                                         <FontAwesomeIcon icon={faArrowRight} />
                                     </span>
