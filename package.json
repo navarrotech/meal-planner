@@ -12,7 +12,9 @@
     "bulma": "^0.9.4",
     "bulma-divider": "^0.2.0",
     "bulma-tooltip": "^3.0.2",
+    "commander": "15.0.0",
     "firebase": "^10.8.1",
+    "firebase-admin": "14.2.0",
     "moment": "^2.29.4",
     "react": "^18.2.0",
     "react-color": "^2.19.3",
@@ -24,7 +26,6 @@
     "react-scripts": "5.0.1",
     "redux": "^4.2.1",
     "sass": "^1.57.1",
-    "typescript": "^4.9.4",
     "uuid": "^9.0.1",
     "vite": "^4.3.2",
     "vite-tsconfig-paths": "^4.2.0",
@@ -32,22 +33,33 @@
   },
   "devDependencies": {
     "@types/creativebulma__bulma-tagsinput": "^1.0.6",
-    "@types/node": "^18.11.18",
+    "@types/node": "^22.10.2",
     "@types/react": "^18.0.26",
     "@types/react-dom": "^18.0.10",
     "@types/uuid": "^9.0.8",
     "@vitejs/plugin-react": "^4.2.1",
     "firebase-tools": "^13.4.0",
+    "tsx": "4.23.12",
+    "typescript": "5.9.3",
     "typescript-plugin-css-modules": "^4.1.1",
-    "vite-bundle-visualizer": "^1.1.0"
+    "vite-bundle-visualizer": "^1.1.0",
+    "vitest": "4.1.10"
   },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "analyze": "vite-bundle-visualizer"
+    "analyze": "vite-bundle-visualizer",
+    "meals": "tsx cli/index.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p cli/tsconfig.json",
+    "typecheck:app": "tsc --noEmit"
   },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "yarn@1.22.22",
   "eslintConfig": {
     "extends": [
       "react-app",

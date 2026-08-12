@@ -60,6 +60,27 @@ If you would like to spin up your own instance of the meal planner application, 
 
     Once the deployment is complete, you can access the meal planner application using the provided Firebase Hosting URL.
 
+## Managing meals from the command line
+
+The planner can also be driven from a terminal, without opening the app. This is handy for bulk
+edits, scripting, and for pointing an AI coding agent at a clone of the repository and letting it
+manage the schedule directly.
+
+```bash
+yarn meals recipe create --title "Chicken Curry" --type dinner --ingredients "chicken,rice"
+yarn meals plan create --recipe <recipeId> --date 2026-08-11 --type dinner
+yarn meals plan list --from 2026-08-10 --to 2026-08-16
+yarn meals plan move <planId> --date 2026-08-11 --to-date 2026-08-14 --to-type lunch
+```
+
+It needs a Firebase service account, which you can generate in the Firebase console under
+**Project settings > Service accounts > Generate new private key**. Save it as
+`firebase-service-account.json` in the repository root, or point `MEAL_PLANNER_SERVICE_ACCOUNT`
+at it. The file is gitignored.
+
+Run `yarn meals --help` for the full command list, and see [docs/cli.md](docs/cli.md) for
+details.
+
 ## Security notes
 
 If you want to host this on the cloud using Firebase Hosting (like I do), you may not want just anyone signing up and viewing your family's meal plan. For me, I just wanted me and my partner to sign up and only the two of us should have access to the website. To handle this, firebase auth provides an option to prevent sign-ups in the [firebase console](https://console.firebase.google.com/). To get there, navigate to Authentication on the sidebar, and find the "settings" tab. Under "User Actions" you can see a checkbox for "Enable create (sign up)." I recommend signing up yourself and anyone else you want, then disabling this.

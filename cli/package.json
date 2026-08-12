@@ -1,0 +1,5 @@
+{
+  "name": "meal-planner-cli",
+  "private": true,
+  "type": "module"
+}
