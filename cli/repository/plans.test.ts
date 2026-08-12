@@ -83,6 +83,8 @@ const TUESDAY_DINNER: PlannedMeal = {
     forWho: 'Anakin',
     recipeId: 'recipe-curry',
     notes: 'extra spicy',
+    needsIngredients: false,
+    missingIngredients: [],
     type: 'dinner',
     date: moment('2026-08-11', 'YYYY-MM-DD').toISOString()
 }
@@ -225,6 +227,73 @@ describe('updatePlan', () => {
         await expect(
             updatePlan('plan-1', moment('2026-08-11', 'YYYY-MM-DD'), 'dinner', { recipeId: 'nope' })
         ).rejects.toThrow(/No recipe found with id "nope"/)
+    })
+
+    it<Context>('stores the shopping mark and its list', async (context) => {
+        const { updatePlan } = await import('./plans')
+
+        await updatePlan('plan-1', moment('2026-08-11', 'YYYY-MM-DD'), 'dinner', {
+            needsIngredients: true,
+            missingIngredients: [ 'chicken', 'rice' ]
+        })
+
+        expect(
+            context.database.tree().meals['2026']['August']['11']['dinner']['plan-1']
+        ).toMatchObject({
+            needsIngredients: true,
+            missingIngredients: [ 'chicken', 'rice' ]
+        })
+    })
+
+    it<Context>('clears the list once the shopping is done', async () => {
+        const { updatePlan } = await import('./plans')
+
+        await updatePlan('plan-1', moment('2026-08-11', 'YYYY-MM-DD'), 'dinner', {
+            needsIngredients: true,
+            missingIngredients: [ 'chicken' ]
+        })
+
+        const cleared = await updatePlan('plan-1', moment('2026-08-11', 'YYYY-MM-DD'), 'dinner', {
+            needsIngredients: false,
+            missingIngredients: []
+        })
+
+        expect(cleared.needsIngredients).toBe(false)
+        expect(cleared.missingIngredients).toEqual([])
+    })
+})
+
+describe('createPlan', () => {
+    it<Context>('defaults a new meal to needing nothing', async () => {
+        const { createPlan } = await import('./plans')
+
+        const created = await createPlan({
+            recipeId: 'recipe-curry',
+            date: moment('2026-08-12', 'YYYY-MM-DD'),
+            type: 'dinner'
+        })
+
+        expect(created.needsIngredients).toBe(false)
+        expect(created.missingIngredients).toEqual([])
+    })
+
+    it<Context>('schedules a meal that already knows what it is waiting on', async (context) => {
+        const { createPlan } = await import('./plans')
+
+        const created = await createPlan({
+            recipeId: 'recipe-curry',
+            date: moment('2026-08-12', 'YYYY-MM-DD'),
+            type: 'dinner',
+            needsIngredients: true,
+            missingIngredients: [ 'curry paste' ]
+        })
+
+        expect(
+            context.database.tree().meals['2026']['August']['12']['dinner'][created.id]
+        ).toMatchObject({
+            needsIngredients: true,
+            missingIngredients: [ 'curry paste' ]
+        })
     })
 })
 

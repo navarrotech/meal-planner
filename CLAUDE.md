@@ -40,9 +40,12 @@ list rather than appending.
 yarn meals plan list   --from 2026-08-11 --to 2026-08-17 [--type dinner] [--for-who Alex]
 yarn meals plan get    <id> --date 2026-08-11 [--type dinner]
 yarn meals plan create --recipe <recipeId> --date 2026-08-11 --type dinner \
-                       [--for-who Anakin] [--notes "extra spicy"]
+                       [--for-who Anakin] [--notes "extra spicy"] \
+                       [--needs-ingredients] [--missing "chicken,rice"]
 yarn meals plan update <id> --date 2026-08-11 [--type dinner] \
-                       [--recipe <recipeId>] [--for-who ...] [--notes ...]
+                       [--recipe <recipeId>] [--for-who ...] [--notes ...] \
+                       [--needs-ingredients | --no-needs-ingredients] [--missing "chicken"]
+yarn meals plan shopping-list --from 2026-08-11 --to 2026-08-17 [--for-who Alex]
 yarn meals plan move   <id> --date 2026-08-11 [--type dinner] \
                        [--to-date 2026-08-14] [--to-type lunch]
 yarn meals plan delete <id> --date 2026-08-11 [--type dinner]
@@ -57,6 +60,9 @@ Notes that matter:
   part of its storage path, so changing them relocates the record. `plan update` rejects
   `--to-date` and `--to-type` for this reason.
 - **`plan list` is capped at 62 days** and resolves recipe titles, so one call is usually enough.
+- **`--missing` replaces the whole list** and implies `--needs-ingredients`, unless
+  `--no-needs-ingredients` is passed alongside it. `plan shopping-list` groups those items across
+  a range. See `docs/shopping-list.md`.
 - Meal types: `breakfast`, `lunch`, `dinner`, `snack`, `sides`, `restaurants`, `drinks`. The
   calendar only renders breakfast, lunch and dinner.
 - Start from `recipe list` to get a real recipe id. `plan create` rejects an unknown one.
@@ -79,6 +85,14 @@ Defined in `src/types.ts`. A `Recipe` is a meal that can be cooked. A `PlannedMe
 recipe by id and pins it to a day and a slot. Ingredients and tags are plain strings, not
 entities. Nothing enforces referential integrity: deleting a recipe leaves its planned meals
 orphaned, which the calendar renders as "Recipe not found".
+
+A `PlannedMeal` also carries `needsIngredients` and `missingIngredients`: the mark that it is
+waiting on a trip to the store, and what it is waiting on. The calendar warns about marked meals
+and adds them up into a shopping list. See `docs/shopping-list.md`.
+
+Records read back from Firebase are a subset of their type, since the database omits empty and
+`false`-y values. `src/lib/meals.ts` normalizes a planned meal to the full shape, and both the
+browser app and the CLI read through it.
 
 Storage layout, and the single most important detail in this repo:
 

@@ -52,9 +52,13 @@ Both types are declared in `src/types.ts`.
 `instructions`, `type`, `ingredients` and `tags`. Ingredients and tags are arrays of plain
 strings, not entities.
 
-`PlannedMeal` carries `id`, `recipeId`, `forWho`, `notes`, `type` and `date` (an ISO string).
-`forWho` exists because a household does not always eat the same thing: several planned meals can
-occupy one slot on one day, one per person.
+`PlannedMeal` carries `id`, `recipeId`, `forWho`, `notes`, `needsIngredients`,
+`missingIngredients`, `type` and `date` (an ISO string). `forWho` exists because a household does
+not always eat the same thing: several planned meals can occupy one slot on one day, one per person.
+
+`needsIngredients` and `missingIngredients` mark a meal as waiting on a trip to the store and name
+what it is waiting on. They sit on the planned meal rather than on the recipe because what is
+missing depends on the week's cupboard, not on the dish. See `docs/shopping-list.md`.
 
 The link from `PlannedMeal.recipeId` to a recipe is a soft reference. Nothing enforces it, so
 deleting a recipe orphans its planned meals, which the calendar renders as "Recipe not found".
@@ -62,9 +66,12 @@ deleting a recipe orphans its planned meals, which the calendar renders as "Reci
 
 ## Reading records back
 
-The Realtime Database does not store empty strings or empty arrays; it omits the key. A record
-read back is therefore a subset of its type, and both repository modules in `cli/repository/`
-normalize to the full shape before returning.
+The Realtime Database does not store empty strings, empty arrays or `false`-y defaults; it omits
+the key. A record read back is therefore a subset of its type.
+
+`src/lib/meals.ts` normalizes a stored planned meal back to the full shape, and both the browser
+app and the CLI read through it, so a field added to `PlannedMeal` gains its default in one place.
+Recipes are normalized in `cli/repository/recipes.ts`.
 
 ## Validation
 

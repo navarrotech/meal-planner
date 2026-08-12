@@ -15,6 +15,12 @@ export type PlannedMeal = {
     recipeId: string
     notes: string
 
+    // Marked when the kitchen is missing something this meal needs, so the calendar can warn
+    // before the day arrives. The list lives on the planned meal rather than on the recipe,
+    // because what is missing depends on what is in the cupboard, not on the recipe itself.
+    needsIngredients: boolean
+    missingIngredients: string[]
+
     // When the meal is planned to be eaten:
     type: MealType
     date: string

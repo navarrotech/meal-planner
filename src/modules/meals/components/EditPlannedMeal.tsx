@@ -16,10 +16,12 @@ import { mealPlanSchema } from '../validators'
 
 // Components
 import Modal from "@/common/Modal";
+import NeedsIngredients from "./NeedsIngredients";
 import RecipeChooser from "@/modules/recipes/components/RecipeChooser";
 
 export default function EditPlannedMeal() {
     const selectedMeal = useSelector(state => state.recipes.selectedMeal)
+    const recipesById = useSelector(state => state.recipes.byId)
     const [ isLoading, setLoading ] = useState<boolean>(false)
     const [ isValid, setValid ] = useState<boolean>(false)
 
@@ -128,5 +130,12 @@ export default function EditPlannedMeal() {
                 />
             </div>
         </div>
+
+        <NeedsIngredients
+            needsIngredients={selectedMeal.needsIngredients}
+            missingIngredients={selectedMeal.missingIngredients}
+            suggestions={recipesById[selectedMeal.recipeId]?.ingredients || []}
+            onChange={onChange}
+        />
     </Modal>
 }

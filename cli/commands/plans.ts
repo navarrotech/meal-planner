@@ -14,7 +14,8 @@ import {
 } from '../repository/plans'
 
 // Utility
-import { DATE_FORMAT, parseDate, parseMealType } from '../options'
+import { DATE_FORMAT, parseCommaSeparated, parseDate, parseMealType } from '../options'
+import { buildShoppingList } from '@/lib/shoppingList'
 import { succeed } from '../output'
 
 export function registerPlanCommands(program: Command) {
@@ -42,6 +43,26 @@ export function registerPlanCommands(program: Command) {
             )
 
             succeed(plans)
+        })
+
+    plan
+        .command('shopping-list')
+        .description('What still has to be bought for the meals planned across a date range')
+        .requiredOption('--from <date>', `Start of the range, ${DATE_FORMAT}`)
+        .requiredOption('--to <date>', `End of the range, inclusive, ${DATE_FORMAT}`)
+        .option('--for-who <name>', 'Only meals planned for this person')
+        .action(async (options) => {
+            const plans = await listPlans(
+                parseDate(options.from, '--from'),
+                parseDate(options.to, '--to'),
+                {
+                    forWho: options.forWho
+                }
+            )
+
+            succeed(
+                buildShoppingList(plans)
+            )
         })
 
     plan
@@ -78,13 +99,23 @@ export function registerPlanCommands(program: Command) {
         .requiredOption('--type <type>', 'Which slot it fills')
         .option('--for-who <name>', 'Who this one is for, when the household eats differently')
         .option('--notes <text>', 'Notes, up to 1024 characters')
+        .option('--needs-ingredients', 'Mark it as waiting on a trip to the store')
+        .option('--missing <list>', 'Comma-separated ingredients still to buy, which implies --needs-ingredients')
         .action(async (options) => {
+            const missingIngredients = options.missing
+                ? parseCommaSeparated(options.missing)
+                : undefined
+
             const created = await createPlan({
                 recipeId: options.recipe,
                 date: parseDate(options.date, '--date'),
                 type: parseMealType(options.type, '--type'),
                 forWho: options.forWho,
-                notes: options.notes
+                notes: options.notes,
+                // Naming what to buy is the same statement as marking the meal, so it is not
+                // possible to end up with a list that the calendar never warns about.
+                needsIngredients: Boolean(options.needsIngredients || missingIngredients?.length),
+                missingIngredients
             })
 
             succeed(created)
@@ -99,6 +130,9 @@ export function registerPlanCommands(program: Command) {
         .option('--recipe <id>', 'Swap in a different recipe')
         .option('--for-who <name>', 'Who this one is for')
         .option('--notes <text>', 'Notes, up to 1024 characters')
+        .option('--needs-ingredients', 'Mark it as waiting on a trip to the store')
+        .option('--no-needs-ingredients', 'Clear that mark, once the shopping is done')
+        .option('--missing <list>', 'Comma-separated ingredients still to buy, replacing the current list')
         .option('--to-date <date>', 'Not accepted here, see "plan move"')
         .option('--to-type <type>', 'Not accepted here, see "plan move"')
         .action(async (planId: string, options) => {
@@ -121,9 +155,24 @@ export function registerPlanCommands(program: Command) {
             if (options.notes !== undefined) {
                 changes.notes = options.notes
             }
+            if (options.needsIngredients !== undefined) {
+                changes.needsIngredients = options.needsIngredients
+            }
+            if (options.missing !== undefined) {
+                changes.missingIngredients = parseCommaSeparated(options.missing)
+
+                // A list without the mark would never reach the calendar or the shopping list,
+                // so naming ingredients turns the mark on unless it was explicitly cleared.
+                if (changes.missingIngredients.length && options.needsIngredients === undefined) {
+                    changes.needsIngredients = true
+                }
+            }
 
             if (!Object.keys(changes).length) {
-                throw new Error('Nothing to update. Pass at least one of --recipe, --for-who or --notes.')
+                throw new Error(
+                    'Nothing to update. Pass at least one of --recipe, --for-who, --notes, '
+                    + '--needs-ingredients or --missing.'
+                )
             }
 
             succeed(

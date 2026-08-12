@@ -58,9 +58,10 @@ parseable. Error messages name the next step, for example which command to run t
 | Command | Purpose |
 | --- | --- |
 | `plan list --from --to [--type] [--for-who]` | Planned meals across a range, with recipe titles resolved. |
+| `plan shopping-list --from --to [--for-who]` | What still has to be bought across a range. |
 | `plan get <id> --date [--type]` | One planned meal. |
 | `plan create --recipe --date --type [...]` | Schedule a recipe on a day. |
-| `plan update <id> --date [--type] [...]` | Change recipe, `--for-who` or `--notes` in place. |
+| `plan update <id> --date [--type] [...]` | Change recipe, `--for-who`, `--notes` or the shopping mark in place. |
 | `plan move <id> --date [--type] [--to-date] [--to-type]` | Move it to another day or slot, keeping its id. |
 | `plan delete <id> --date [--type]` | Remove it from the schedule. |
 
@@ -73,7 +74,10 @@ Rules worth knowing:
 - `plan update` refuses `--to-date` and `--to-type`. Changing a day or a slot relocates the
   record, which is `plan move`'s job. See `docs/database.md`.
 - `plan list` is capped at 62 days. It reads a whole month at a time, so a range costs a handful
-  of round trips rather than one per day.
+  of round trips rather than one per day. `plan shopping-list` reads through it, so the cap and the
+  round trips are the same.
+- `--missing` replaces the whole list rather than appending, and implies `--needs-ingredients`
+  unless `--no-needs-ingredients` is passed alongside it. See `docs/shopping-list.md`.
 
 ### Example
 
@@ -89,6 +93,10 @@ yarn meals plan create --recipe <recipeId> --date 2026-08-11 --type dinner \
 yarn meals plan list --from 2026-08-10 --to 2026-08-16
 
 yarn meals plan move <planId> --date 2026-08-11 --to-date 2026-08-14 --to-type lunch
+
+yarn meals plan update <planId> --date 2026-08-11 --missing "curry paste,rice"
+
+yarn meals plan shopping-list --from 2026-08-10 --to 2026-08-16
 ```
 
 ## Layout

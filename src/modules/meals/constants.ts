@@ -13,7 +13,10 @@ export function makeNewMealPlan(recipe: Recipe, type: MealType, date: typeof mom
     
         recipeId: recipe.id,
         notes,
-    
+
+        needsIngredients: false,
+        missingIngredients: [],
+
         type,
         date: date.toISOString(),
     };

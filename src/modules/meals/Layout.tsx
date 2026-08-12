@@ -11,21 +11,43 @@ import EditPlannedMeal from "./components/EditPlannedMeal";
 import RecipeList from "@/modules/recipes/components/RecipesList";
 import AddToDropzone from "./components/AddToDropzone";
 import AddRecipe from "../recipes/components/AddRecipe";
+import ShoppingList from "./components/ShoppingList";
 import Dropzone from "./components/Dropzone";
 import Button from "@/common/Button";
 
+// Data
+import { DAY_KEY_FORMAT, useMealPlansInRange } from "./hooks";
+
 // Iconography & styles
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faArrowRight, faCartShopping } from "@fortawesome/free-solid-svg-icons";
 import styles from './calendar.module.sass'
 
 const isMobile = () => window.innerWidth < 768
 const getDayCount = () => isMobile() ? 1 : 7
 
 export default function MealPlanLayout(){
-    
+
     const [ date, setDate ] = useState<typeof moment>( moment().startOf(isMobile() ? "day" : "week") )
-    const lastDayOfWeek = date.clone().add(getDayCount() - 1, 'days')
+    const [ isShoppingListOpen, setShoppingListOpen ] = useState<boolean>(false)
+
+    const dayCount = getDayCount()
+    const lastDayOfWeek = date.clone().add(dayCount - 1, 'days')
+
+    // The days on screen are subscribed once here rather than once per dropzone, so the
+    // calendar and the shopping list are always describing the same meals.
+    const mealsByDay = useMealPlansInRange(date, dayCount)
+    const days: (typeof moment)[] = Array.from(
+        { length: dayCount },
+        (_, offset) => date.clone().add(offset, 'days')
+    )
+
+    // Every slot counts towards the shopping, including the ones the calendar cannot draw:
+    // a snack planned from the CLI still needs buying.
+    const mealsOnScreen = days.flatMap(
+        (day) => Object.values(mealsByDay[day.format(DAY_KEY_FORMAT)] || {}).flat()
+    )
+    const mealsNeedingIngredients = mealsOnScreen.filter((meal) => meal.needsIngredients)
 
     return <section className="section">
         <div className={"container " + styles.container}>
@@ -64,26 +86,40 @@ export default function MealPlanLayout(){
                                     </>
                                 }
                             </h1>
-                            <div className="block buttons is-right has-addons is-centered-mobile">
-                                <Button onClick={() => setDate(date.clone().subtract(getDayCount(), 'days'))}>
+                            <div className="block buttons is-right is-centered-mobile">
+                                <Button
+                                    color={mealsNeedingIngredients.length ? "warning" : "default"}
+                                    onClick={() => setShoppingListOpen(true)}
+                                >
                                     <span className="icon">
-                                        <FontAwesomeIcon icon={faArrowLeft} />
+                                        <FontAwesomeIcon icon={faCartShopping} />
                                     </span>
+                                    <span>Shopping list</span>
+                                    { mealsNeedingIngredients.length
+                                        ? <span className="tag is-dark ml-2">{ mealsNeedingIngredients.length }</span>
+                                        : <></>
+                                    }
                                 </Button>
-                                <Button onClick={() => setDate(date.clone().add(getDayCount(), 'days'))}>
-                                    <span className="icon">
-                                        <FontAwesomeIcon icon={faArrowRight} />
-                                    </span>
-                                </Button>
+                                <div className="buttons has-addons ml-3">
+                                    <Button onClick={() => setDate(date.clone().subtract(dayCount, 'days'))}>
+                                        <span className="icon">
+                                            <FontAwesomeIcon icon={faArrowLeft} />
+                                        </span>
+                                    </Button>
+                                    <Button onClick={() => setDate(date.clone().add(dayCount, 'days'))}>
+                                        <span className="icon">
+                                            <FontAwesomeIcon icon={faArrowRight} />
+                                        </span>
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                         <div className="block pt-3">
                             <div className="block columns is-gapless">{
-                                Array.apply(0, Array(getDayCount())).map((_, index) => {
-                                    const day: typeof moment = date.clone().add(index, 'days')
-
+                                days.map((day, index) => {
                                     const isToday = day.isSame(moment(), 'day')
                                     const isPast = day.isBefore(moment(), 'day')
+                                    const dayMeals = mealsByDay[day.format(DAY_KEY_FORMAT)]
 
                                     return <div
                                         className={"column " + (isPast ? "is-disabled" : "")}
@@ -95,9 +131,9 @@ export default function MealPlanLayout(){
                                         </div>
                                         <hr className="is-hidden-touch" />
                                         <div>
-                                            <Dropzone date={day} type="breakfast" />
-                                            <Dropzone date={day} type="lunch" />
-                                            <Dropzone date={day} type="dinner" />
+                                            <Dropzone date={day} type="breakfast" plannedMeals={dayMeals?.breakfast || []} />
+                                            <Dropzone date={day} type="lunch" plannedMeals={dayMeals?.lunch || []} />
+                                            <Dropzone date={day} type="dinner" plannedMeals={dayMeals?.dinner || []} />
                                         </div>
                                     </div>
                                 })
@@ -110,5 +146,12 @@ export default function MealPlanLayout(){
         </div>
         <EditPlannedMeal />
         <AddToDropzone />
+        { isShoppingListOpen
+            ? <ShoppingList
+                meals={mealsOnScreen}
+                onClose={() => setShoppingListOpen(false)}
+            />
+            : <></>
+        }
     </section>
 }

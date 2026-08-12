@@ -1,6 +1,7 @@
 // Copyright © 2026 Navarrotech
 
 import type { MealType, PlannedMeal } from '@/types'
+import type { StoredDay, StoredPlannedMeal } from '@/lib/meals'
 import type { Moment } from 'moment'
 
 // Core
@@ -11,6 +12,7 @@ import { getRecipe, listRecipes } from './recipes'
 import moment from 'moment'
 import { v4 as uuid } from 'uuid'
 import { mealDayPath, mealMonthPath, mealPlanPath, mealPlanPathParts } from '@/lib/paths'
+import { readStoredDay, toPlannedMeal } from '@/lib/meals'
 import { MealTypesArray, mealPlanSchema } from '@/modules/meals/validators'
 
 export type PlanInput = {
@@ -19,12 +21,16 @@ export type PlanInput = {
     type: MealType
     forWho?: string
     notes?: string
+    needsIngredients?: boolean
+    missingIngredients?: string[]
 }
 
 export type PlanChanges = {
     recipeId?: string
     forWho?: string
     notes?: string
+    needsIngredients?: boolean
+    missingIngredients?: string[]
 }
 
 export type PlanFilters = {
@@ -47,20 +53,8 @@ export type PlannedMealWithRecipe = PlannedMeal & {
  */
 export const MAX_RANGE_DAYS = 62
 
-type StoredMonth = Record<string, Record<string, Record<string, Partial<PlannedMeal>>>>
-
-// The Realtime Database omits empty strings rather than storing them, so a record read back
-// is a subset of PlannedMeal. Everything downstream expects the full shape.
-function toPlannedMeal(stored: Partial<PlannedMeal>, planId: string, type: MealType): PlannedMeal {
-    return {
-        id: stored.id || planId,
-        forWho: stored.forWho || '',
-        recipeId: stored.recipeId || '',
-        notes: stored.notes || '',
-        type: stored.type || type,
-        date: stored.date || ''
-    }
-}
+// A month node holds one child per day, each of which is a day node.
+type StoredMonth = Record<string, StoredDay>
 
 export async function listPlans(
     from: Moment,
@@ -113,16 +107,8 @@ export async function listPlans(
                 continue
             }
 
-            for (const [ slotType, storedById ] of Object.entries(slots)) {
-                if (!storedById) {
-                    continue
-                }
-
-                for (const [ planId, stored ] of Object.entries(storedById)) {
-                    plans.push(
-                        toPlannedMeal(stored, planId, slotType as MealType)
-                    )
-                }
+            for (const mealsInSlot of Object.values(readStoredDay(slots))) {
+                plans.push(...mealsInSlot)
             }
         }
     }
@@ -163,7 +149,7 @@ export async function getPlan(planId: string, date: Moment, type?: MealType): Pr
 
     if (type) {
         const snapshot = await database.ref(mealPlanPath(year, month, day, type, planId)).get()
-        const stored = snapshot.val() as Partial<PlannedMeal> | null
+        const stored = snapshot.val() as StoredPlannedMeal | null
 
         if (!stored) {
             return null
@@ -173,7 +159,7 @@ export async function getPlan(planId: string, date: Moment, type?: MealType): Pr
     }
 
     const snapshot = await database.ref(mealDayPath(year, month, day)).get()
-    const slots = snapshot.val() as Record<string, Record<string, Partial<PlannedMeal>>> | null
+    const slots = snapshot.val() as StoredDay | null
 
     if (!slots) {
         return null
@@ -211,6 +197,8 @@ export async function createPlan(input: PlanInput): Promise<PlannedMeal> {
         forWho: input.forWho || '',
         recipeId: input.recipeId,
         notes: input.notes || '',
+        needsIngredients: input.needsIngredients || false,
+        missingIngredients: input.missingIngredients || [],
         type: input.type,
         date: input.date.toISOString()
     }

@@ -11,27 +11,27 @@ import { setDraggingRecipe, setDraggingMeal, selectMeal, setSelectedDropzone } f
 import moment from "moment";
 
 // Typescript
-import type { MealType } from '@/types'
+import type { MealType, PlannedMeal } from '@/types'
 
-// Styling
+// Iconography & styles
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCartShopping } from "@fortawesome/free-solid-svg-icons";
 import styles from '../calendar.module.sass'
 import { createMealPlanFromRecipe, deleteMealPlan } from "../actions";
-import { useMealPlans } from "../hooks";
 
 type Props = {
     date: typeof moment
     type: MealType
+    // The day's meals are subscribed once by the calendar and handed down, so every slot on
+    // screen and the shopping list are reading the same records.
+    plannedMeals: PlannedMeal[]
 }
 
-export default function Dropzone({ date, type }: Props) {
+export default function Dropzone({ date, type, plannedMeals }: Props) {
     const [ isBeingReDragged, setReDragged ] = useState<string>()
     const [ hoveredOver, setHoveredOver ] = useState<boolean>(false)
 
     const recipesById = useSelector(state => state.recipes.byId)
-    
-    // Get the planned meals for the day
-    const [ year, month, day ] = date.format("YYYY-MMMM-DD").split("-")
-    const plannedMeals = useMealPlans(year, month, day, type);
 
     return <div
         data-key="dropzone"
@@ -97,11 +97,25 @@ export default function Dropzone({ date, type }: Props) {
             plannedMeals.map((meal, index) => {
                 const recipe = recipesById[meal.recipeId]
                 const key = meal.id + "-" + index
+
+                const classes = [ styles.plannedMeal ]
+                if (isBeingReDragged === meal.id){
+                    classes.push(styles.reDragged)
+                }
+                if (meal.needsIngredients){
+                    classes.push(styles.needsIngredients)
+                }
+
                 return <div
                     id={key}
                     key={key}
                     draggable
-                    className={`${styles.plannedMeal} ${isBeingReDragged === meal.id ? styles.reDragged : ''}`}
+                    title={
+                        meal.needsIngredients
+                            ? "Still to buy: " + (meal.missingIngredients.join(", ") || "not listed yet")
+                            : undefined
+                    }
+                    className={classes.join(" ")}
                     onClick={() => {
                         dispatch(
                             selectMeal(meal)
@@ -123,8 +137,14 @@ export default function Dropzone({ date, type }: Props) {
                         setReDragged("")
                     }}
                 >
+                    { meal.needsIngredients
+                        ? <span className={"icon is-small " + styles.needsIngredientsIcon}>
+                            <FontAwesomeIcon icon={faCartShopping} size="xs" />
+                        </span>
+                        : <></>
+                    }
                     { meal.forWho
-                        ? <>    
+                        ? <>
                             <strong className="is-hidden-desktop">{ meal.forWho.slice(0, 1) }: </strong>
                             <strong className="is-hidden-touch">{ meal.forWho }: </strong>
                         </>

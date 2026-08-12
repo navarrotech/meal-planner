@@ -6,30 +6,58 @@ import { useState, useEffect } from "react";
 // Typescript
 import type { MealType, PlannedMeal, PlannedDayGroup } from "@/types";
 
+// Utility
+import moment from "moment";
+import { readStoredDay } from "@/lib/meals";
+import { mealPlanPathParts } from "@/lib/paths";
+
 // Firebase data
 import { onValue } from "firebase/database";
-import { mealsListRef, todaysMealsRef } from "./references";
+import { mealDayRef, todaysMealsRef } from "./references";
 
-export function useMealPlans(year: string, month: string, startDay: string, type: MealType) {
-    const [ meals, setMeals ] = useState<PlannedMeal[]>([]);
+// The key a day is looked up by. Not the stored path format, which lives in @/lib/paths.
+export const DAY_KEY_FORMAT = "YYYY-MM-DD"
+
+export type PlannedMealsByDay = Record<string, Record<MealType, PlannedMeal[]>>
+
+/**
+ * The whole range on screen is subscribed here, once, rather than by each dropzone. The calendar
+ * and the shopping list then read the same records, so a meal cannot warn in one and be missing
+ * from the other.
+ */
+export function useMealPlansInRange(startDate: typeof moment, dayCount: number) {
+    const [ mealsByDay, setMealsByDay ] = useState<PlannedMealsByDay>({});
+
+    // A moment is a new object on every render, so the range is tracked by the day it starts on.
+    const startDayKey = startDate.format(DAY_KEY_FORMAT)
 
     useEffect(() => {
-        const unsubscribe = onValue(
-            mealsListRef( year, month, startDay, type ),
-            (snapshot) => {
-                const data = snapshot.val();
-                setMeals(
-                    data ? Object.values(data) : []
-                );
-            }
-        );
+        // Drop the days the previous range covered. Left in place they would keep feeding the
+        // shopping list meals from a week the user has already navigated away from.
+        setMealsByDay({});
+
+        const unsubscribes = Array.from({ length: dayCount }, (_, offset) => {
+            const day = moment(startDayKey, DAY_KEY_FORMAT).add(offset, 'days');
+            const { year, month, day: dayOfMonth } = mealPlanPathParts(day);
+            const dayKey = day.format(DAY_KEY_FORMAT);
+
+            return onValue(
+                mealDayRef(year, month, dayOfMonth),
+                (snapshot) => {
+                    setMealsByDay((current) => ({
+                        ...current,
+                        [dayKey]: readStoredDay(snapshot.val())
+                    }));
+                }
+            );
+        });
 
         return () => {
-            unsubscribe();
+            unsubscribes.forEach((unsubscribe) => unsubscribe());
         }
-    }, [ startDay, month, year, type ]);
+    }, [ startDayKey, dayCount ]);
 
-    return meals
+    return mealsByDay
 }
 
 export function useTodaysMeals(){
@@ -44,34 +72,16 @@ export function useTodaysMeals(){
         const unsubscribe = onValue(
             todaysMealsRef(),
             (snapshot) => {
-                const data = snapshot.val() as Record<MealType, Record<string, PlannedMeal>> | null;
-                if (!data){
-                    return;
-                }
+                const day = readStoredDay(snapshot.val());
 
-                // Some small re-structuring to make it easier to work with
-
-                const grouping: PlannedDayGroup = {
-                    all: [],
-                    breakfast: [],
-                    lunch: [],
-                    dinner: []
-                }
-
-                data.breakfast && Object.values(data.breakfast).forEach((meal) => {
-                    grouping.breakfast.push(meal);
-                    grouping.all.push(meal);
-                })
-                data.lunch && Object.values(data.lunch).forEach((meal) => {
-                    grouping.lunch.push(meal);
-                    grouping.all.push(meal);
-                })
-                data.dinner && Object.values(data.dinner).forEach((meal) => {
-                    grouping.dinner.push(meal);
-                    grouping.all.push(meal);
-                })
-
-                setMeals(grouping);
+                // Today's page only shows the three cooked meals, so the other slots are dropped
+                // here rather than rendered nowhere.
+                setMeals({
+                    all: [ ...day.breakfast, ...day.lunch, ...day.dinner ],
+                    breakfast: day.breakfast,
+                    lunch: day.lunch,
+                    dinner: day.dinner
+                });
             }
         );
 
@@ -79,6 +89,6 @@ export function useTodaysMeals(){
             unsubscribe();
         }
     }, []);
-    
+
     return meals
 }

@@ -52,3 +52,29 @@
 
         &:hover
             background: rgba(255, 255, 255, 0.4)
+
+        // A meal still waiting on a trip to the store has to read as "not ready" from across
+        // the kitchen, so it glows rather than carrying a badge that has to be hunted for.
+        &.needsIngredients
+            background: rgba($warning, 0.75)
+            color: $black
+            animation: needsIngredientsGlow 2.4s ease-in-out infinite
+
+            &:hover
+                background: rgba($warning, 0.6)
+
+            .needsIngredientsIcon
+                margin-right: 0.1em
+                vertical-align: baseline
+
+@keyframes needsIngredientsGlow
+    0%, 100%
+        box-shadow: 0 0 0 1px $warning, 0 0 4px rgba($warning, 0.35)
+    50%
+        box-shadow: 0 0 0 1px $warning, 0 0 14px rgba($warning, 0.8)
+
+// A pulsing meal is a nudge, never a requirement, so it stops for anyone who asked it to.
+@media (prefers-reduced-motion: reduce)
+    .plannedMeal.needsIngredients
+        animation: none
+        box-shadow: 0 0 0 1px $warning, 0 0 10px rgba($warning, 0.6)

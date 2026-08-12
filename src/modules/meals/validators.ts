@@ -30,6 +30,25 @@ export const mealPlanSchema = yup
             .notRequired()
             .default(""),
 
+        needsIngredients: yup
+            .boolean()
+            .typeError("Needs ingredients must be true or false")
+            .notRequired()
+            .default(false),
+
+        missingIngredients: yup
+            .array()
+            .of(
+                yup
+                    .string()
+                    .typeError("Each ingredient must be a string")
+                    .max(128, "An ingredient must be at most 128 characters")
+                    .required()
+            )
+            .max(64, "A meal may list at most 64 ingredients")
+            .notRequired()
+            .default([]),
+
         date: yup
             .string()
             .typeError("Date must be a string")
