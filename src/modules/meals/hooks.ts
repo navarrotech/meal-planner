@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 
 // Typescript
 import type { MealType, PlannedMeal, PlannedDayGroup } from "@/types";
+import type { StoredDay } from "@/lib/meals";
 
 // Utility
 import moment from "moment";
@@ -13,17 +14,24 @@ import { mealPlanPathParts } from "@/lib/paths";
 
 // Firebase data
 import { onValue } from "firebase/database";
-import { mealDayRef, todaysMealsRef } from "./references";
+import { mealMonthRef, todaysMealsRef } from "./references";
 
 // The key a day is looked up by. Not the stored path format, which lives in @/lib/paths.
 export const DAY_KEY_FORMAT = "YYYY-MM-DD"
 
+// The prefix every day key of one month shares, used to replace a month's days wholesale.
+const MONTH_KEY_FORMAT = "YYYY-MM"
+
 export type PlannedMealsByDay = Record<string, Record<MealType, PlannedMeal[]>>
 
 /**
- * The whole range on screen is subscribed here, once, rather than by each dropzone. The calendar
- * and the shopping list then read the same records, so a meal cannot warn in one and be missing
- * from the other.
+ * Every day from `startDate` for `dayCount` days, keyed by `YYYY-MM-DD`. The calendar draws the
+ * week it shows out of this, and the shopping list reads the whole span, so one subscription
+ * feeds both and a meal cannot warn in one and be missing from the other.
+ *
+ * Months are subscribed rather than days: a two month span costs two listeners this way, where a
+ * day at a time would cost sixty. The cost of that is having to replace a month's days wholesale
+ * when its snapshot arrives, or a deleted day would linger.
  */
 export function useMealPlansInRange(startDate: typeof moment, dayCount: number) {
     const [ mealsByDay, setMealsByDay ] = useState<PlannedMealsByDay>({});
@@ -33,24 +41,55 @@ export function useMealPlansInRange(startDate: typeof moment, dayCount: number) 
 
     useEffect(() => {
         // Drop the days the previous range covered. Left in place they would keep feeding the
-        // shopping list meals from a week the user has already navigated away from.
+        // shopping list meals from a span the user has already navigated away from.
         setMealsByDay({});
 
-        const unsubscribes = Array.from({ length: dayCount }, (_, offset) => {
-            const day = moment(startDayKey, DAY_KEY_FORMAT).add(offset, 'days');
-            const { year, month, day: dayOfMonth } = mealPlanPathParts(day);
-            const dayKey = day.format(DAY_KEY_FORMAT);
+        const firstDay = moment(startDayKey, DAY_KEY_FORMAT);
+        const lastDay = firstDay.clone().add(dayCount - 1, 'days');
+        const lastDayKey = lastDay.format(DAY_KEY_FORMAT);
 
-            return onValue(
-                mealDayRef(year, month, dayOfMonth),
-                (snapshot) => {
-                    setMealsByDay((current) => ({
-                        ...current,
-                        [dayKey]: readStoredDay(snapshot.val())
-                    }));
-                }
-            );
-        });
+        const months = [];
+        const cursor = firstDay.clone().startOf('month');
+
+        while (cursor.isSameOrBefore(lastDay, 'month')) {
+            months.push({
+                ...mealPlanPathParts(cursor),
+                // Days arrive keyed by day of the month alone, so the month they belong to has
+                // to come from the subscription rather than from the record.
+                dayKeyPrefix: cursor.format(MONTH_KEY_FORMAT) + "-"
+            });
+            cursor.add(1, 'month');
+        }
+
+        const unsubscribes = months.map(({ year, month, dayKeyPrefix }) => onValue(
+            mealMonthRef(year, month),
+            (snapshot) => {
+                const days = snapshot.val() as Record<string, StoredDay> | null;
+
+                setMealsByDay((current) => {
+                    const next: PlannedMealsByDay = {};
+
+                    for (const [ dayKey, slots ] of Object.entries(current)) {
+                        if (!dayKey.startsWith(dayKeyPrefix)) {
+                            next[dayKey] = slots;
+                        }
+                    }
+
+                    for (const [ dayOfMonth, slots ] of Object.entries(days || {})) {
+                        const dayKey = dayKeyPrefix + dayOfMonth;
+
+                        // A month reaches past both ends of the span it was subscribed for.
+                        if (!slots || dayKey < startDayKey || dayKey > lastDayKey) {
+                            continue;
+                        }
+
+                        next[dayKey] = readStoredDay(slots);
+                    }
+
+                    return next;
+                });
+            }
+        ));
 
         return () => {
             unsubscribes.forEach((unsubscribe) => unsubscribe());

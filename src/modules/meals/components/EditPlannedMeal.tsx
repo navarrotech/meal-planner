@@ -12,7 +12,11 @@ import { selectMeal } from "@/modules/recipes/reducer";
 
 // Utility
 import { deleteMealPlan, updateMealPlan } from "../actions";
+import { googleCalendarEventUrl } from "../googleCalendar";
 import { mealPlanSchema } from '../validators'
+
+// Iconography
+import { faCalendarPlus } from "@fortawesome/free-solid-svg-icons";
 
 // Components
 import Modal from "@/common/Modal";
@@ -67,6 +71,17 @@ export default function EditPlannedMeal() {
         title="Edit Planned Meal"
         onClose={() => dispatch(selectMeal(null))}
         actions={[
+            {
+                // Exports what is on screen, unsaved edits included, since Google Calendar
+                // opens its own editor and nothing is created until the user saves it there.
+                text: "Add to Google Calendar",
+                color: "info",
+                icon: faCalendarPlus,
+                href: googleCalendarEventUrl(
+                    selectedMeal,
+                    recipesById[selectedMeal.recipeId]
+                )
+            },
             {
                 text: "Cancel",
                 color: "default",

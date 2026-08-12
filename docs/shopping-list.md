@@ -31,24 +31,41 @@ ingredient sets the mark, so a list can never exist that nothing ever warns abou
 and its `title` names what is still to buy. The glow stops for anyone whose system asks for reduced
 motion; the colour and the icon carry the same information without it.
 
-The header holds a **Shopping list** button, badged with how many meals on screen are waiting. It
-opens one alphabetical list of ingredients, each with the meals that need it, followed by any meal
-that is marked without saying what it needs. Reporting those separately is the difference between a
-short list and a wrong one.
+The header holds a **Shopping list** button, badged with how many meals are waiting. It opens one
+alphabetical list of ingredients, each with the meals that need it, followed by any meal that is
+marked without saying what it needs. Reporting those separately is the difference between a short
+list and a wrong one. With nothing to buy the button is not rendered at all, so its presence is
+itself the signal.
 
 The list covers every slot stored for those days, including `snack`, `sides`, `restaurants` and
 `drinks`, which the calendar itself cannot draw. A snack scheduled from the CLI still needs buying.
 
+## The list looks further ahead than the calendar does
+
+`SHOPPING_HORIZON_DAYS` is 62. The list, and the badge, cover the visible week's first day and the
+two months after it, not just the seven days drawn on screen.
+
+Ingredients are bought days or weeks before the meal that needs them. A list that stopped at the
+week on screen would say nothing about a meal three weeks out until the week it lands in, which is
+too late to be worth saying. The modal names the span it covers, so a short list is never mistaken
+for a narrow one.
+
+Sixty-two days is the span `plan list` caps at in the CLI, which keeps both surfaces answering the
+same question.
+
 ## Where the data comes from
 
-`src/modules/meals/Layout.tsx` subscribes to the whole range on screen through
-`useMealPlansInRange`, one listener per day, and hands each dropzone its slot. Before this the
-dropzones each subscribed to their own slot, which would have left the shopping list reading the
-tree a second time. One subscription means the calendar and the list can never disagree about which
-meals exist.
+`src/modules/meals/Layout.tsx` subscribes to that whole span through `useMealPlansInRange` and
+hands each dropzone its slot. The calendar draws the week out of the same records the list reads,
+so a meal cannot warn in one and be missing from the other, and the dropzones no longer each
+subscribe to their own slot.
 
-Navigating to another week drops the previous range's days from state rather than merging over
-them, so the list never quietly includes a week the user has left.
+Subscriptions are one listener per month, not per day: two months of horizon cost two or three
+listeners where a day at a time would cost sixty. The cost of that is having to replace a month's
+days wholesale when its snapshot arrives, or a deleted day would linger in state.
+
+Navigating to another week drops the previous span's days rather than merging over them, so the
+list never quietly includes a span the user has left.
 
 ## From the command line
 

@@ -5,10 +5,14 @@ import { createPortal } from 'react-dom';
 
 // Typescript
 import type { ReactNode } from "react";
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import type { BulmaColors } from "@/types";
 
 // Components
 import Button from './Button';
+
+// Iconography
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 type ModalButton = {
     text: string
@@ -17,6 +21,14 @@ type ModalButton = {
     disabled?: boolean
     closeAfterOnClick?: boolean
     onClick?: () => void
+
+    // An action that leaves the app is a real link, so it opens in a new tab the way any other
+    // link does. Given one, the action renders as an anchor rather than a button.
+    href?: string
+
+    // Given an icon, the action shows only that. Its `text` stays the label, as the tooltip and
+    // as the accessible name, because an icon on its own is a guess.
+    icon?: IconDefinition
 }
 
 type ModalProps = {
@@ -56,12 +68,39 @@ export default function Modal(props: ModalProps) {
                     children
                 }</section>
                 <footer className="modal-card-foot buttons is-right">{
-                    actions.map((action, index) => (
-                        <Button
+                    actions.map((action, index) => {
+                        const label = action.icon
+                            ? <span className="icon">
+                                <FontAwesomeIcon icon={action.icon} />
+                            </span>
+                            : <span>{ action.text }</span>
+
+                        if (action.href){
+                            return <a
+                                key={index}
+                                className={`button is-${action.color} has-tooltip-arrow`}
+                                href={action.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label={action.text}
+                                data-tooltip={action.icon ? action.text : undefined}
+                                onClick={() => {
+                                    action.onClick?.()
+                                    if (action.closeAfterOnClick) {
+                                        onClose()
+                                    }
+                                }}
+                            >{ label }</a>
+                        }
+
+                        return <Button
                             key={index}
                             color={action.color}
                             loading={action.loading}
                             disabled={action.disabled}
+                            className={action.icon ? "has-tooltip-arrow" : undefined}
+                            aria-label={action.text}
+                            data-tooltip={action.icon ? action.text : undefined}
                             onClick={function modalButtonClicked(){
                                 if (action.disabled || action.loading){
                                     return;
@@ -71,10 +110,8 @@ export default function Modal(props: ModalProps) {
                                     onClose()
                                 }
                             }}
-                        >
-                            <span>{ action.text }</span>
-                        </Button>
-                    ))
+                        >{ label }</Button>
+                    })
                 }</footer>
             </div>
         </div>,

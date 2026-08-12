@@ -11,6 +11,9 @@ type Props = {
     disabled?: boolean
     loading?: boolean
     color?: BulmaColors
+
+    // bulma-tooltip reads its text from this attribute, so an icon-only button can say what it is.
+    'data-tooltip'?: string
 } & ButtonHTMLAttributes<HTMLButtonElement>
 
 export default function Button(props: Props){

@@ -14,8 +14,13 @@ import { buildShoppingList } from "@/lib/shoppingList";
 import Modal from "@/common/Modal";
 
 type Props = {
-    // Every meal on screen, marked or not. Filtering is the shopping list's own job.
+    // Every meal in the span, marked or not. Filtering is the shopping list's own job.
     meals: PlannedMeal[]
+
+    // The span those meals came from, which reaches well past the week on screen.
+    from: typeof moment
+    through: typeof moment
+
     onClose: () => void
 }
 
@@ -42,6 +47,11 @@ export default function ShoppingList(props: Props) {
             }
         ]}
     >
+        <p className="is-size-7 mb-4">
+            Everything planned from { props.from.format("MMM Do") } to { props.through.format("MMM Do") }, not
+            just the week on screen.
+        </p>
+
         { entries.length || mealsWithNothingListed.length
             ? <div className="content">
                 <ul>{
