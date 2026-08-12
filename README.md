@@ -41,7 +41,7 @@ If you would like to spin up your own instance of the meal planner application, 
 
     - Create a new Firebase project at [https://console.firebase.google.com](https://console.firebase.google.com).
     - Enable Firebase Hosting, Firebase Cloud Storage, Firebase Authentication, and Firebase Realtime Database for your project.
-    - Obtain the Firebase configuration values (apiKey, authDomain, projectId, etc.) from the Firebase project settings, and create a `firebase-credentials.json` file in the root of the project containing these details.
+    - Obtain the Firebase configuration values (apiKey, authDomain, projectId, etc.) from the Firebase project settings, and create a `firebase-credentials.json` file in the root of the project containing these details. Include the `databaseURL` key: the app needs it, and so does the command line tool described below.
 
 4. Running locally in development:
 

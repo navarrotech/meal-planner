@@ -51,6 +51,10 @@ yarn meals plan delete <id> --date 2026-08-11 [--type dinner]
 Notes that matter:
 
 - **Dates are strictly `YYYY-MM-DD`.** Nothing else parses. There is no "today" shorthand.
+- **Feed `plannedOn` back into `--date`, never `date`.** Every plan comes back with both. `date`
+  is the ISO timestamp the web app stores, and east of UTC its first ten characters spell the
+  day *before* the one the meal is filed under. `plannedOn` is derived from the storage path and
+  is always the right value to pass back.
 - **`--date` locates the record**, so it is required for everything except `list` and `create`.
   `--type` only narrows the lookup and can be omitted; the day's slots are scanned instead.
 - **Use `plan move` to change a day or a slot, never `plan update`.** A meal's date and type are

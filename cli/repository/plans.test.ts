@@ -281,6 +281,63 @@ describe('listPlans', () => {
     })
 })
 
+describe('plannedOn', () => {
+    /**
+     * The stored `date` is an ISO instant of local midnight, so east of UTC its first ten
+     * characters spell the day before the one the record is filed under. Anything that reads a
+     * day off `date` targets the wrong slot, so `plannedOn` must come from the path instead.
+     * Seeding a deliberately skewed record proves that without depending on the host timezone.
+     */
+    const SKEWED_DATE = '2026-08-10T22:00:00.000Z'
+
+    beforeEach<Context>(async (context) => {
+        await context.database
+            .ref('meals/2026/August/11/dinner/plan-1')
+            .set({ ...TUESDAY_DINNER, date: SKEWED_DATE })
+    })
+
+    it<Context>('reports the day the record is filed under, not the day its ISO date spells', async () => {
+        const { listPlans } = await import('./plans')
+
+        const plans = await listPlans(
+            moment('2026-08-11', 'YYYY-MM-DD'),
+            moment('2026-08-11', 'YYYY-MM-DD')
+        )
+
+        expect(plans[0].date).toBe(SKEWED_DATE)
+        expect(plans[0].plannedOn).toBe('2026-08-11')
+    })
+
+    it<Context>('round-trips: plannedOn from a listing locates the same record', async (context) => {
+        const { listPlans, movePlan } = await import('./plans')
+
+        const [ listed ] = await listPlans(
+            moment('2026-08-11', 'YYYY-MM-DD'),
+            moment('2026-08-11', 'YYYY-MM-DD')
+        )
+
+        // Exactly what a caller does with the listing: feed plannedOn straight back into --date.
+        const moved = await movePlan(
+            listed.id,
+            moment(listed.plannedOn, 'YYYY-MM-DD'),
+            undefined,
+            moment('2026-08-14', 'YYYY-MM-DD')
+        )
+
+        expect(moved.plannedOn).toBe('2026-08-14')
+        expect(context.database.tree().meals['2026']['August']['14']['dinner']['plan-1']).toBeDefined()
+    })
+
+    it<Context>('never persists the reporting field back into the database', async (context) => {
+        const { updatePlan } = await import('./plans')
+
+        await updatePlan('plan-1', moment('2026-08-11', 'YYYY-MM-DD'), 'dinner', { notes: 'changed' })
+
+        const stored = context.database.tree().meals['2026']['August']['11']['dinner']['plan-1']
+        expect(stored).not.toHaveProperty('plannedOn')
+    })
+})
+
 describe('deletePlan', () => {
     it<Context>('removes the record and returns what was removed', async (context) => {
         const { deletePlan } = await import('./plans')

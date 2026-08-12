@@ -19,8 +19,14 @@ then make it findable:
 2. `GOOGLE_APPLICATION_CREDENTIALS` pointing at the JSON file
 3. `firebase-service-account.json` in the repository root
 
-The database URL comes from `FIREBASE_DATABASE_URL`, falling back to the `databaseURL` key in the
-`firebase-credentials.json` the web app already requires. Both JSON files are gitignored.
+The database URL comes from `FIREBASE_DATABASE_URL`, falling back to the `databaseURL` key in
+`firebase-credentials.json`. Both JSON files are gitignored.
+
+The two files are different things and easy to confuse. `firebase-credentials.json` is the
+**web** config the browser app needs, copied from the Firebase console's web app settings; the
+CLI reads only its `databaseURL` key, so make sure that key is present.
+`firebase-service-account.json` is the **server** key described above, and it is the only one
+the CLI authenticates with.
 
 Paths resolve against the working directory, so run commands from the repository root.
 
@@ -60,7 +66,7 @@ parseable. Error messages name the next step, for example which command to run t
 | `plan list --from --to [--type] [--for-who]` | Planned meals across a range, with recipe titles resolved. |
 | `plan get <id> --date [--type]` | One planned meal. |
 | `plan create --recipe --date --type [...]` | Schedule a recipe on a day. |
-| `plan update <id> --date [--type] [...]` | Change recipe, `--for-who` or `--notes` in place. |
+| `plan update <id> --date [--type] [--recipe] [--for-who] [--notes]` | Change those three fields in place. It cannot change the day or slot. |
 | `plan move <id> --date [--type] [--to-date] [--to-type]` | Move it to another day or slot, keeping its id. |
 | `plan delete <id> --date [--type]` | Remove it from the schedule. |
 
@@ -68,6 +74,11 @@ Rules worth knowing:
 
 - Dates are strictly `YYYY-MM-DD`. Loose parsing would accept `8/11` or `next tuesday` and
   silently resolve the wrong day, which is unrecoverable once a meal is written to that path.
+- Every plan carries two date fields, and only one of them is an input. `date` is the ISO
+  timestamp the web app stores: it is an instant of local midnight, so east of UTC its first ten
+  characters spell the previous day while the record sits under the correct one. `plannedOn` is
+  derived from the storage path and is what `--date` expects. Always round-trip through
+  `plannedOn`; reading a day off `date` targets the wrong slot.
 - `--date` is how a record is located, so it is required for every single-plan command.
 - `--type` is optional everywhere it appears: without it the day's slots are scanned.
 - `plan update` refuses `--to-date` and `--to-type`. Changing a day or a slot relocates the

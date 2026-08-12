@@ -33,11 +33,22 @@ export type PlanFilters = {
 }
 
 /**
+ * `plannedOn` is the day the record actually lives under, written the way every --date option
+ * expects. It is not redundant with `date`: the app stores `date` as an ISO instant of local
+ * midnight, so anywhere east of UTC its first ten characters spell the previous day while the
+ * record sits under the correct one. Reading a day off `date` therefore targets the wrong slot.
+ * `plannedOn` comes from the storage path instead, so it always round-trips back into --date.
+ */
+export type PlannedMealResult = PlannedMeal & {
+    plannedOn: string
+}
+
+/**
  * A planned meal carries only a recipeId, so a bare listing would force a second lookup for
  * every row. Recipes can be deleted out from under a plan, which the web app renders as
  * "Recipe not found"; a null title mirrors that rather than hiding the orphan.
  */
-export type PlannedMealWithRecipe = PlannedMeal & {
+export type PlannedMealWithRecipe = PlannedMealResult & {
     recipeTitle: string | null
 }
 
@@ -71,9 +82,10 @@ export async function listPlans(
         throw new Error('The end of the range is before its start. Check --from and --to.')
     }
 
-    // Build the set of days the range covers using the same formatter the paths use, so the
-    // range and the stored keys can never disagree about how a day is spelled.
-    const includedDays = new Set<string>()
+    // Build the days the range covers using the same formatter the paths use, so the range and
+    // the stored keys can never disagree about how a day is spelled. Each stored key maps to
+    // the YYYY-MM-DD spelling of the same day, which is what --date takes.
+    const includedDays = new Map<string, string>()
     const monthsToRead = new Map<string, { year: string, month: string }>()
 
     const cursor = from.clone().startOf('day')
@@ -85,7 +97,7 @@ export async function listPlans(
         }
 
         const { year, month, day } = mealPlanPathParts(cursor)
-        includedDays.add(`${year}/${month}/${day}`)
+        includedDays.set(`${year}/${month}/${day}`, cursor.format('YYYY-MM-DD'))
         monthsToRead.set(`${year}/${month}`, { year, month })
         cursor.add(1, 'day')
     }
@@ -102,14 +114,15 @@ export async function listPlans(
         })
     )
 
-    const plans: PlannedMeal[] = []
+    const plans: PlannedMealResult[] = []
     for (const { year, month, days } of months) {
         if (!days) {
             continue
         }
 
         for (const [ day, slots ] of Object.entries(days)) {
-            if (!slots || !includedDays.has(`${year}/${month}/${day}`)) {
+            const plannedOn = includedDays.get(`${year}/${month}/${day}`)
+            if (!slots || !plannedOn) {
                 continue
             }
 
@@ -119,9 +132,10 @@ export async function listPlans(
                 }
 
                 for (const [ planId, stored ] of Object.entries(storedById)) {
-                    plans.push(
-                        toPlannedMeal(stored, planId, slotType as MealType)
-                    )
+                    plans.push({
+                        ...toPlannedMeal(stored, planId, slotType as MealType),
+                        plannedOn
+                    })
                 }
             }
         }
@@ -154,10 +168,13 @@ export async function listPlans(
 }
 
 /**
+ * Returns the record exactly as stored, with no reporting fields attached, because callers
+ * merge the result straight back into Firebase. Adding `plannedOn` here would persist it.
+ *
  * The meal type is optional because it is recoverable: without it the day's slots are scanned.
  * The date is not optional, because it is what locates the record in the first place.
  */
-export async function getPlan(planId: string, date: Moment, type?: MealType): Promise<PlannedMeal | null> {
+async function findPlan(planId: string, date: Moment, type?: MealType): Promise<PlannedMeal | null> {
     const { year, month, day } = mealPlanPathParts(date)
     const database = getMealPlannerDatabase()
 
@@ -189,6 +206,19 @@ export async function getPlan(planId: string, date: Moment, type?: MealType): Pr
     return null
 }
 
+export async function getPlan(planId: string, date: Moment, type?: MealType): Promise<PlannedMealResult | null> {
+    const found = await findPlan(planId, date, type)
+
+    if (!found) {
+        return null
+    }
+
+    return {
+        ...found,
+        plannedOn: date.format('YYYY-MM-DD')
+    }
+}
+
 function missingPlanError(planId: string, date: Moment) {
     return new Error(
         `No planned meal with id "${planId}" on ${date.format('YYYY-MM-DD')}. `
@@ -196,7 +226,7 @@ function missingPlanError(planId: string, date: Moment) {
     )
 }
 
-export async function createPlan(input: PlanInput): Promise<PlannedMeal> {
+export async function createPlan(input: PlanInput): Promise<PlannedMealResult> {
     // Catch a mistyped recipe id here rather than storing a plan that renders as
     // "Recipe not found" in the calendar.
     const recipe = await getRecipe(input.recipeId)
@@ -222,7 +252,10 @@ export async function createPlan(input: PlanInput): Promise<PlannedMeal> {
         .ref(mealPlanPath(year, month, day, plan.type, plan.id))
         .set(plan)
 
-    return plan
+    return {
+        ...plan,
+        plannedOn: input.date.format('YYYY-MM-DD')
+    }
 }
 
 export async function updatePlan(
@@ -230,8 +263,8 @@ export async function updatePlan(
     date: Moment,
     type: MealType | undefined,
     changes: PlanChanges
-): Promise<PlannedMeal> {
-    const existing = await getPlan(planId, date, type)
+): Promise<PlannedMealResult> {
+    const existing = await findPlan(planId, date, type)
     if (!existing) {
         throw missingPlanError(planId, date)
     }
@@ -260,7 +293,10 @@ export async function updatePlan(
         .ref(mealPlanPath(year, month, day, existing.type, planId))
         .set(updated)
 
-    return updated
+    return {
+        ...updated,
+        plannedOn: date.format('YYYY-MM-DD')
+    }
 }
 
 /**
@@ -274,8 +310,8 @@ export async function movePlan(
     type: MealType | undefined,
     toDate?: Moment,
     toType?: MealType
-): Promise<PlannedMeal> {
-    const existing = await getPlan(planId, date, type)
+): Promise<PlannedMealResult> {
+    const existing = await findPlan(planId, date, type)
     if (!existing) {
         throw missingPlanError(planId, date)
     }
@@ -314,10 +350,14 @@ export async function movePlan(
     await database.ref(destinationPath).set(moved)
     await database.ref(sourcePath).remove()
 
-    return moved
+    return {
+        ...moved,
+        plannedOn: destinationDate.format('YYYY-MM-DD')
+    }
 }
 
-export async function deletePlan(planId: string, date: Moment, type?: MealType): Promise<PlannedMeal> {
+export async function deletePlan(planId: string, date: Moment, type?: MealType): Promise<PlannedMealResult> {
+    // getPlan rather than findPlan: nothing is written back here, so the reporting field is safe.
     const existing = await getPlan(planId, date, type)
     if (!existing) {
         throw missingPlanError(planId, date)
