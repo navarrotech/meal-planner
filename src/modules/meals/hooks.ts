@@ -14,7 +14,7 @@ import { mealPlanPathParts } from "@/lib/paths";
 
 // Firebase data
 import { onValue } from "firebase/database";
-import { mealMonthRef, todaysMealsRef } from "./references";
+import { mealDayRef, mealMonthRef } from "./references";
 
 // The key a day is looked up by. Not the stored path format, which lives in @/lib/paths.
 export const DAY_KEY_FORMAT = "YYYY-MM-DD"
@@ -99,7 +99,12 @@ export function useMealPlansInRange(startDate: typeof moment, dayCount: number) 
     return mealsByDay
 }
 
-export function useTodaysMeals(){
+/**
+ * One day's meals, grouped the way the day pages read them. Today and Tomorrow are the same page
+ * pointed at different days, so they share this rather than each keeping their own subscription
+ * to a date they worked out themselves.
+ */
+export function useMealsOnDay(date: typeof moment){
     const [ meals, setMeals ] = useState<PlannedDayGroup>({
         all: [],
         breakfast: [],
@@ -107,13 +112,20 @@ export function useTodaysMeals(){
         dinner: []
     });
 
+    // A moment is a new object on every render, so the day is tracked by the day it is.
+    const dayKey = date.format(DAY_KEY_FORMAT)
+
     useEffect(() => {
+        const { year, month, day: dayOfMonth } = mealPlanPathParts(
+            moment(dayKey, DAY_KEY_FORMAT)
+        );
+
         const unsubscribe = onValue(
-            todaysMealsRef(),
+            mealDayRef(year, month, dayOfMonth),
             (snapshot) => {
                 const day = readStoredDay(snapshot.val());
 
-                // Today's page only shows the three cooked meals, so the other slots are dropped
+                // The day pages only show the three cooked meals, so the other slots are dropped
                 // here rather than rendered nowhere.
                 setMeals({
                     all: [ ...day.breakfast, ...day.lunch, ...day.dinner ],
@@ -127,7 +139,7 @@ export function useTodaysMeals(){
         return () => {
             unsubscribe();
         }
-    }, []);
+    }, [ dayKey ]);
 
     return meals
 }

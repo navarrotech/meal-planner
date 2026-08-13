@@ -20,6 +20,8 @@ export function makeNewRecipe(): Recipe {
         
         ingredients: [],
         tags: [],
+
+        timesPlanned: 0,
     };
 }
 

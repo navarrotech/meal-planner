@@ -9,6 +9,7 @@ up, as described in the README.
 
 ```
 recipes/<recipeId>                                   Recipe
+people/<personId>                                    Person
 meals/<YYYY>/<MonthName>/<DD>/<mealType>/<planId>    PlannedMeal
 ```
 
@@ -49,8 +50,12 @@ exists in Firebase.
 Both types are declared in `src/types.ts`.
 
 `Recipe` carries `id`, `image` (a Cloud Storage download URL), `title`, `details`,
-`instructions`, `type`, `ingredients` and `tags`. Ingredients and tags are arrays of plain
-strings, not entities.
+`instructions`, `type`, `ingredients`, `tags` and `timesPlanned`. Ingredients and tags are arrays
+of plain strings, not entities. `timesPlanned` is a running total maintained by both the app and
+the CLI; see `docs/data.md`.
+
+`Person` carries `id`, `name` and `color`. A planned meal refers to a person by name rather than by
+id, which is load-bearing: see `docs/people.md`.
 
 `PlannedMeal` carries `id`, `recipeId`, `forWho`, `notes`, `needsIngredients`,
 `missingIngredients`, `type` and `date` (an ISO string). `forWho` exists because a household does

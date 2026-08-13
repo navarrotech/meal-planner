@@ -33,6 +33,9 @@ meal:
   stands out wherever it was dropped. Burger King in a lunch slot is still eating out.
 - **Amber, glowing: waiting on the store.** See `docs/shopping-list.md`.
 
+Whose meal it is shows as a coloured stripe down the left edge instead, so it can be read at the
+same time as either of those. See `docs/people.md`.
+
 Amber is declared after purple so it wins when both apply: waiting on the shopping outranks where
 the meal is eaten.
 

@@ -53,6 +53,13 @@ export default function Topbar() {
                     </NavLink>
                     <NavLink
                         className={({ isActive }) => `navbar-item ${isActive ? 'is-selected' : ''}`}
+                        to="/dashboard/tomorrow"
+                        onClick={() => setShowMobileMenu(false)}
+                    >
+                        Tomorrow
+                    </NavLink>
+                    <NavLink
+                        className={({ isActive }) => `navbar-item ${isActive ? 'is-selected' : ''}`}
                         to="/dashboard/meals"
                         onClick={() => setShowMobileMenu(false)}
                     >
@@ -65,7 +72,30 @@ export default function Topbar() {
                     >
                         Recipes
                     </NavLink>
+
+                    {/* On a desktop the settings sections hang off one item; on a phone, where
+                        there is no hover, they are listed flat in the burger menu below. */}
+                    <div className="navbar-item has-dropdown is-hoverable is-hidden-touch">
+                        <NavLink
+                            className={({ isActive }) => `navbar-link ${isActive ? 'is-selected' : ''}`}
+                            to="/dashboard/settings"
+                        >
+                            Settings
+                        </NavLink>
+                        <div className="navbar-dropdown">
+                            <NavLink to="/dashboard/settings/people" className="navbar-item">People</NavLink>
+                            <NavLink to="/dashboard/settings/data" className="navbar-item">Data</NavLink>
+                        </div>
+                    </div>
+
                     <hr className="navbar-divider is-hidden-desktop" />
+                    <NavLink
+                        className={({ isActive }) => `navbar-item is-hidden-desktop ${isActive ? 'is-selected' : ''}`}
+                        to="/dashboard/settings/people"
+                        onClick={() => setShowMobileMenu(false)}
+                    >
+                        Settings: People
+                    </NavLink>
                     <NavLink
                         to="/account"
                         className="navbar-item is-hidden-desktop"

@@ -21,6 +21,9 @@ import * as Auth from './modules/authentication/Forms'
 import MealPlanLayout from './modules/meals/Layout'
 import RecipeLayout from './modules/recipes/Layout';
 import TodayLayout from './modules/today/Layout';
+import SettingsLayout from './modules/settings/Layout';
+import ManagePeople from './modules/settings/components/ManagePeople';
+import ManageData from './modules/settings/components/ManageData';
 
 // Stylesheet
 import "./sass/index.sass"
@@ -42,6 +45,12 @@ root.render(
                         <Route path="/dashboard/meals" element={<MealPlanLayout />} />
                         <Route path="/dashboard/recipes" element={<RecipeLayout />} />
                         <Route path="/dashboard/today" element={<TodayLayout />} />
+                        <Route path="/dashboard/tomorrow" element={<TodayLayout dayOffset={1} />} />
+                        <Route path="/dashboard/settings" element={<SettingsLayout />}>
+                            <Route index element={<Navigate to="/dashboard/settings/people" />} />
+                            <Route path="people" element={<ManagePeople />} />
+                            <Route path="data" element={<ManageData />} />
+                        </Route>
                     </Route>
                     <Route path="*" element={<Navigate to="/login" />} />
                 </Routes>

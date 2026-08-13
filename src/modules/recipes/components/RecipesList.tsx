@@ -24,13 +24,28 @@ type Props = {
     onClick?: (recipe: Recipe) => void
 }
 
+/**
+ * Most used first by default. A household cooks the same handful of things most weeks, and
+ * alphabetical order buries them under everything tried once and never repeated.
+ */
+const sorters = {
+    used: (left: Recipe, right: Recipe) =>
+        (right.timesPlanned || 0) - (left.timesPlanned || 0) || left.title.localeCompare(right.title),
+    title: (left: Recipe, right: Recipe) =>
+        left.title.localeCompare(right.title)
+} as const
+
+type SortKey = keyof typeof sorters
+
 type State = {
     search: string
+    sort: SortKey
     selectedRecipe: Recipe | null
 }
 
 const initialState: State = {
     search: "",
+    sort: "used",
     selectedRecipe: null
 }
 
@@ -66,7 +81,7 @@ export default function RecipesList(props: Props){
             return <>
                 <p>{ title }</p>
                 {
-                recipes.map(recipe => <div
+                [ ...recipes ].sort(sorters[state.sort]).map(recipe => <div
                     draggable={!props.onClick}
                     id={recipe.id}
                     key={recipe.id}
@@ -143,6 +158,16 @@ export default function RecipesList(props: Props){
             <span className="icon is-left">
                 <FontAwesomeIcon icon={faSearch} />
             </span>
+        </div>
+        <div className="select is-small is-fullwidth mt-2">
+            <select
+                aria-label="Order the recipes"
+                value={state.sort}
+                onChange={({ target: { value } }) => setState({ ...state, sort: value as SortKey })}
+            >
+                <option value="used">Most used first</option>
+                <option value="title">A to Z</option>
+            </select>
         </div>
     </div>
 

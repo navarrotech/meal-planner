@@ -2,18 +2,20 @@
 
 // Typescript
 import { startRecipes, stopRecipes } from "@/modules/recipes/actions"
-import type { Dispatch } from "redux"
+import { startPeople, stopPeople } from "@/modules/people/actions"
 
 export function initialize() {
     // Thunk
-    return async (dispatch: Dispatch) => {
+    return async () => {
         startRecipes()
+        startPeople()
     }
 }
 
 export function reset() {
     // Thunk
-    return async (dispatch: Dispatch) => {
+    return async () => {
         stopRecipes()
+        stopPeople()
     }
 }

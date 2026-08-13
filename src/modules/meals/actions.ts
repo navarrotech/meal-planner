@@ -8,9 +8,33 @@ import moment from "moment"
 import { makeNewMealPlan } from "./constants"
 import { mealPlanPathParts } from "@/lib/paths"
 
+// Redux
+import { getState } from "@/store"
+
 // Firebase
 import { mealsSetRef } from "./references"
-import { remove, set } from "firebase/database"
+import { recipeRef } from "@/modules/recipes/references"
+import { get, increment, remove, set, update } from "firebase/database"
+
+/**
+ * A recipe keeps a running total of how many meals point at it, so the recipe list can be
+ * ordered by what the household actually cooks without walking the calendar. It moves by atomic
+ * increment rather than read-then-write, so two people planning at once cannot lose a count.
+ *
+ * A recipe that no longer exists is skipped: an increment would otherwise conjure a recipe made
+ * of nothing but a number, which the planner would then list.
+ */
+function countPlannedMeal(recipeId: string, change: 1 | -1){
+    if (!recipeId || !getState().recipes.byId[recipeId]){
+        console.debug("Not counting a planned meal against an unknown recipe", recipeId)
+        return
+    }
+
+    update(
+        recipeRef(recipeId),
+        { timesPlanned: increment(change) }
+    )
+}
 
 export async function createMealPlanFromRecipe(date: typeof moment, type: MealType, recipe: Recipe, forWho?: string, notes?: string){
     const newMealPlan = makeNewMealPlan(
@@ -28,6 +52,8 @@ export async function createMealPlanFromRecipe(date: typeof moment, type: MealTy
         mealsSetRef(year, month, day, type, newMealPlan.id),
         newMealPlan
     )
+
+    countPlannedMeal(newMealPlan.recipeId, 1)
 }
 
 export async function deleteMealPlan(plan: PlannedMeal){
@@ -36,15 +62,24 @@ export async function deleteMealPlan(plan: PlannedMeal){
     await remove(
         mealsSetRef(year, month, day, plan.type, plan.id)
     )
+
+    countPlannedMeal(plan.recipeId, -1)
 }
 
 export async function updateMealPlan(plan: PlannedMeal){
     const { year, month, day } = mealPlanPathParts(moment(plan.date))
+    const planRef = mealsSetRef(year, month, day, plan.type, plan.id)
 
-    await set(
-        mealsSetRef(year, month, day, plan.type, plan.id),
-        plan
-    )
+    // Read first so a swapped recipe moves the count off the old one and onto the new one.
+    // Dragging a meal to another day is a delete and a create, which balances on its own.
+    const stored = (await get(planRef)).val() as PlannedMeal | null
+
+    await set(planRef, plan)
+
+    if (stored && stored.recipeId !== plan.recipeId){
+        countPlannedMeal(stored.recipeId, -1)
+        countPlannedMeal(plan.recipeId, 1)
+    }
 }
 
 /**

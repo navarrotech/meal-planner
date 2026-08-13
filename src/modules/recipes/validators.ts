@@ -53,5 +53,13 @@ export const recipeSchema = yup
             .of(tagSchema())
             .max(32, "No more than 32 tags")
             .default([]),
+
+        // Deliberately unbounded below: the count is maintained by atomic increments from two
+        // places, and rejecting a recipe whose total has drifted would block editing it.
+        timesPlanned: yup
+            .number()
+            .typeError("Times planned must be a number")
+            .notRequired()
+            .default(0),
     })
     .noUnknown("Invalid keys provided")

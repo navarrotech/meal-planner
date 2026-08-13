@@ -10,8 +10,9 @@ import moment from 'moment'
 
 /**
  * Firebase is the external boundary, so it is replaced by a small in-memory tree that behaves
- * the way the Realtime Database does: reads return null for a missing path, and a `set`
- * replaces a whole node rather than merging into it. Asserting against the resulting tree
+ * the way the Realtime Database does: reads return null for a missing path, a `set` replaces a
+ * whole node rather than merging into it, and an `update` merges the keys it is given, resolving
+ * the increment sentinel against what is already stored. Asserting against the resulting tree
  * proves where records actually landed, which a call-counting stub could not.
  */
 function createFakeDatabase(initial: Record<string, unknown>) {
@@ -24,6 +25,24 @@ function createFakeDatabase(initial: Record<string, unknown>) {
             const parentSegments = segments.slice(0, -1)
 
             return {
+                async update(values: Record<string, any>) {
+                    let node: any = root
+                    for (const segment of segments) {
+                        if (!node[segment]) {
+                            node[segment] = {}
+                        }
+                        node = node[segment]
+                    }
+
+                    for (const [ key, value ] of Object.entries(values)) {
+                        // firebase-admin's ServerValue.increment is a sentinel object the
+                        // server resolves. The fake resolves it the same way the server would.
+                        const delta = value?.['.sv']?.increment
+                        node[key] = delta === undefined
+                            ? value
+                            : (node[key] || 0) + delta
+                    }
+                },
                 async get() {
                     let node: any = root
                     for (const segment of segments) {
@@ -75,7 +94,8 @@ const CURRY: Recipe = {
     instructions: '',
     type: 'dinner',
     ingredients: [ 'chicken', 'rice' ],
-    tags: [ 'weeknight' ]
+    tags: [ 'weeknight' ],
+    timesPlanned: 1
 }
 
 const TUESDAY_DINNER: PlannedMeal = {
@@ -360,5 +380,63 @@ describe('deletePlan', () => {
         expect(
             context.database.tree().meals['2026']['August']['11']['dinner']['plan-1']
         ).toBeUndefined()
+    })
+})
+
+/**
+ * The count orders the recipe list in the web app, and the CLI plans meals too. If only one of
+ * them counted, the list would quietly rank the wrong things first.
+ */
+describe('recipe usage counts', () => {
+    it<Context>('counts a meal against its recipe when it is planned', async (context) => {
+        const { createPlan } = await import('./plans')
+
+        await createPlan({
+            recipeId: 'recipe-curry',
+            date: moment('2026-08-12', 'YYYY-MM-DD'),
+            type: 'dinner'
+        })
+
+        expect(context.database.tree().recipes['recipe-curry'].timesPlanned).toBe(2)
+    })
+
+    it<Context>('takes the count back when the meal is unplanned', async (context) => {
+        const { deletePlan } = await import('./plans')
+
+        await deletePlan('plan-1', moment('2026-08-11', 'YYYY-MM-DD'))
+
+        expect(context.database.tree().recipes['recipe-curry'].timesPlanned).toBe(0)
+    })
+
+    it<Context>('moves the count when a plan swaps recipes', async (context) => {
+        const { updatePlan } = await import('./plans')
+
+        await context.database.ref('recipes/recipe-soup').set({
+            ...CURRY,
+            id: 'recipe-soup',
+            title: 'Soup',
+            timesPlanned: 4
+        })
+
+        await updatePlan('plan-1', moment('2026-08-11', 'YYYY-MM-DD'), 'dinner', {
+            recipeId: 'recipe-soup'
+        })
+
+        const recipes = context.database.tree().recipes
+        expect(recipes['recipe-curry'].timesPlanned).toBe(0)
+        expect(recipes['recipe-soup'].timesPlanned).toBe(5)
+    })
+
+    it<Context>('leaves the count alone when a meal only moves day', async (context) => {
+        const { movePlan } = await import('./plans')
+
+        await movePlan(
+            'plan-1',
+            moment('2026-08-11', 'YYYY-MM-DD'),
+            'dinner',
+            moment('2026-08-14', 'YYYY-MM-DD')
+        )
+
+        expect(context.database.tree().recipes['recipe-curry'].timesPlanned).toBe(1)
     })
 })

@@ -41,7 +41,8 @@ function toRecipe(stored: Partial<Recipe>, recipeId: string): Recipe {
         instructions: stored.instructions || '',
         type: stored.type || 'dinner',
         ingredients: stored.ingredients || [],
-        tags: stored.tags || []
+        tags: stored.tags || [],
+        timesPlanned: stored.timesPlanned || 0
     }
 }
 
@@ -90,7 +91,8 @@ export async function createRecipe(input: RecipeInput): Promise<Recipe> {
         instructions: input.instructions || '',
         type: input.type,
         ingredients: input.ingredients || [],
-        tags: input.tags || []
+        tags: input.tags || [],
+        timesPlanned: 0
     }
 
     // The web app only validates to enable its save button, never on write, so this is the

@@ -17,7 +17,8 @@ const CURRY: Recipe = {
     instructions: '',
     type: 'dinner',
     ingredients: [ 'chicken', 'rice' ],
-    tags: []
+    tags: [],
+    timesPlanned: 0
 }
 
 function plannedMeal(overrides: Partial<PlannedMeal> = {}): PlannedMeal {

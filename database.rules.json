@@ -23,6 +23,14 @@
         ".read": "auth !== null",
         ".write": "auth !== null"
       }
+    },
+    "people": {
+      ".read": "auth !== null",
+      ".write": "auth !== null",
+      "$personId": {
+        ".read": "auth !== null",
+        ".write": "auth !== null"
+      }
     }
   }
 }

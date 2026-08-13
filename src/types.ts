@@ -33,6 +33,22 @@ export type PlannedDayGroup = {
     dinner: PlannedMeal[]
 }
 
+/**
+ * Someone a meal can be planned for. A managed list rather than free text, so the same person is
+ * spelled one way everywhere, and so the calendar can colour their meals.
+ *
+ * A planned meal stores the person's `name`, not their id: the names were already written by hand
+ * across months of history, and matching on them keeps that history readable. The cost is that
+ * renaming a person leaves their past meals under the old name.
+ */
+export type Person = {
+    id: string
+    name: string
+
+    // Hex, as an <input type="color"> gives it.
+    color: string
+}
+
 export type Recipe = {
     id: string
 
@@ -45,4 +61,12 @@ export type Recipe = {
 
     ingredients: string[]
     tags: string[]
+
+    /**
+     * How many planned meals point at this recipe. Kept as a running total rather than counted
+     * from the calendar, so ordering the list by what the household actually cooks costs one
+     * field instead of a walk of every meal ever planned. Planning a meal adds one and removing
+     * one takes it away, which the app and the CLI both maintain.
+     */
+    timesPlanned: number
 }

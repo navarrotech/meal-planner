@@ -26,6 +26,7 @@ import RecipeChooser from "@/modules/recipes/components/RecipeChooser";
 export default function EditPlannedMeal() {
     const selectedMeal = useSelector(state => state.recipes.selectedMeal)
     const recipesById = useSelector(state => state.recipes.byId)
+    const people = useSelector(state => state.people.list)
     const [ isLoading, setLoading ] = useState<boolean>(false)
     const [ isValid, setValid ] = useState<boolean>(false)
 
@@ -113,16 +114,30 @@ export default function EditPlannedMeal() {
         <div className="field fancy-label">
             <label className="label">This meal is for:</label>
             <div className="control">
-                <input
-                    autoFocus
-                    className="input"
-                    type="text"
-                    value={selectedMeal.forWho}
-                    placeholder="Anakin Skywalker"
-                    onChange={(e) => onChange({ forWho: e.target.value })}
-                    onKeyDown={onKeyDown}
-                />
+                <div className="select is-fullwidth">
+                    <select
+                        autoFocus
+                        value={selectedMeal.forWho}
+                        onChange={(e) => onChange({ forWho: e.target.value })}
+                        onKeyDown={onKeyDown}
+                    >
+                        <option value="">Everyone</option>
+                        { people.map((person) => <option key={person.id} value={person.name}>{
+                            person.name
+                        }</option>) }
+                        {/* A meal written before this person left the list, or before the list
+                            existed, keeps its name here rather than being silently reassigned. */}
+                        { selectedMeal.forWho && !people.some((person) => person.name === selectedMeal.forWho)
+                            ? <option value={selectedMeal.forWho}>{ selectedMeal.forWho } (not on the list)</option>
+                            : <></>
+                        }
+                    </select>
+                </div>
             </div>
+            { people.length
+                ? <></>
+                : <p className="help">Add the household under Settings, People.</p>
+            }
         </div>
 
         <RecipeChooser

@@ -40,6 +40,7 @@ export default function Dropzone({ date, type, plannedMeals }: Props) {
     const [ hoveredOver, setHoveredOver ] = useState<boolean>(false)
 
     const recipesById = useSelector(state => state.recipes.byId)
+    const peopleByName = useSelector(state => state.people.byName)
 
     return <div
         data-key="dropzone"
@@ -118,10 +119,16 @@ export default function Dropzone({ date, type, plannedMeals }: Props) {
                     classes.push(styles.needsIngredients)
                 }
 
+                // Whose meal it is, shown as a stripe down its edge. The colour has to come
+                // from a border rather than the background, which already says whether the
+                // meal needs shopping or is being eaten out.
+                const person = peopleByName[meal.forWho.toLowerCase()]
+
                 return <div
                     id={key}
                     key={key}
                     draggable
+                    style={person ? { borderLeft: `4px solid ${person.color}` } : undefined}
                     title={
                         meal.needsIngredients
                             ? "Still to buy: " + (meal.missingIngredients.join(", ") || "not listed yet")

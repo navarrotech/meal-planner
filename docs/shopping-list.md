@@ -60,6 +60,10 @@ write lands: putting back a stale copy would undo whatever else happened in betw
 A meal marked without naming anything gets a checkbox too. There is nothing to cross off it, so
 ticking simply says the meal is sorted and clears its mark.
 
+**Copy** puts what is left on the clipboard as plain text, so the list can leave the app: pasted
+into a notes app, or sent to whoever is going to the shop. What is already in the trolley is left
+out, since a list that repeats what you have just bought is a list that gets ignored.
+
 ## The list looks further ahead than the calendar does
 
 `SHOPPING_HORIZON_DAYS` is 62. The list, and the badge, cover the visible week's first day and the

@@ -5,11 +5,13 @@ import { type ThunkAction, configureStore, Action } from '@reduxjs/toolkit'
 // Reducers
 import userReducer from '../modules/authentication/reducer'
 import recipeReducer from '../modules/recipes/reducer'
+import peopleReducer from '../modules/people/reducer'
 
 const store = configureStore({
   reducer: {
     user: userReducer.reducer,
-    recipes: recipeReducer.reducer
+    recipes: recipeReducer.reducer,
+    people: peopleReducer.reducer
   },
   middleware: getDefaultMiddleware =>
   getDefaultMiddleware({

@@ -18,6 +18,13 @@ export function recipePath(recipeId: string) {
     return `${recipesPath}/${recipeId}`
 }
 
+// The household, also flat and keyed by uuid.
+export const peoplePath = 'people'
+
+export function personPath(personId: string) {
+    return `${peoplePath}/${personId}`
+}
+
 /**
  * Planned meals are stored under a date-derived path rather than a flat collection, so the
  * calendar can subscribe to a single day or slot instead of the whole tree. The trade-off is
@@ -36,8 +43,10 @@ export function mealPlanPathParts(date: FormattableDate) {
     } as const
 }
 
+export const mealsPath = 'meals'
+
 export function mealMonthPath(year: string, month: string) {
-    return `meals/${year}/${month}`
+    return `${mealsPath}/${year}/${month}`
 }
 
 export function mealDayPath(year: string, month: string, day: string) {

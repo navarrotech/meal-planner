@@ -14,6 +14,9 @@ import moment from "moment";
 import { buildShoppingList } from "@/lib/shoppingList";
 import { markIngredientBought, markIngredientNeeded, updateMealPlan } from "../actions";
 
+// Iconography
+import { faCheck, faCopy } from "@fortawesome/free-solid-svg-icons";
+
 // Components
 import Modal from "@/common/Modal";
 
@@ -45,6 +48,7 @@ export default function ShoppingList(props: Props) {
     const recipesById = useSelector(state => state.recipes.byId)
     const [ bought, setBought ] = useState<BoughtItem[]>([])
     const [ settledMealIds, setSettledMealIds ] = useState<string[]>([])
+    const [ hasCopied, setHasCopied ] = useState<boolean>(false)
 
     const { entries, mealsWithNothingListed } = buildShoppingList(props.meals)
 
@@ -75,11 +79,32 @@ export default function ShoppingList(props: Props) {
         ...props.meals.filter((meal) => settledMealIds.includes(meal.id))
     ]
 
+    // Plain text, so the list can leave the app: pasted into a notes app, or sent to whoever is
+    // actually going to the shop. What is already in the trolley is left out.
+    function copyToClipboard(){
+        const lines = [
+            ...rows.filter((row) => !row.isBought).map((row) => `- ${row.ingredient}`),
+            ...unnamedMeals
+                .filter((meal) => !settledMealIds.includes(meal.id))
+                .map((meal) => `- ? ${describeMeal(meal)}`)
+        ]
+
+        navigator.clipboard.writeText(lines.join("\n"))
+            .then(() => setHasCopied(true))
+            .catch((error) => console.error("Could not copy the shopping list", error))
+    }
+
     return <Modal
         show
         title="Shopping list"
         onClose={props.onClose}
         actions={[
+            {
+                text: hasCopied ? "Copied" : "Copy",
+                color: "default",
+                icon: hasCopied ? faCheck : faCopy,
+                onClick: copyToClipboard
+            },
             {
                 text: "Done",
                 color: "primary",

@@ -94,10 +94,16 @@ Records read back from Firebase are a subset of their type, since the database o
 `false`-y values. `src/lib/meals.ts` normalizes a planned meal to the full shape, and both the
 browser app and the CLI read through it.
 
+A `Recipe` also carries `timesPlanned`, a running total of the meals pointing at it, which orders
+the recipe list. The app and the CLI both keep it current by atomic increment. A `Person` is a
+member of the household; a planned meal names one in `forWho` by `name`, not by id. See
+`docs/people.md` and `docs/data.md`.
+
 Storage layout, and the single most important detail in this repo:
 
 ```
 recipes/<uuid>
+people/<uuid>
 meals/<YYYY>/<MonthName>/<DD>/<mealType>/<uuid>     e.g. meals/2026/August/11/dinner/<uuid>
 ```
 
@@ -112,7 +118,11 @@ and the CLI. See `docs/database.md`.
 src/            Browser app. src/lib/ is shared with the CLI; everything else is React-only.
 cli/            Node CLI. commands/ parses arguments, repository/ reads and writes Firebase.
 docs/           Per-topic documentation. Keep it current.
+backups/        Exported JSON backups. Gitignored: this repository is public.
 ```
+
+Pages: `/dashboard/today`, `/dashboard/tomorrow`, `/dashboard/meals`, `/dashboard/recipes`, and
+`/dashboard/settings/{people,data}`.
 
 `src/firebase.ts` cannot be imported from Node: it calls `getAnalytics()` at module load. The CLI
 connects separately in `cli/firebase.ts` using the Admin SDK, which bypasses `database.rules.json`.

@@ -10,8 +10,9 @@ import { getRecipe, listRecipes } from './recipes'
 
 // Utility
 import moment from 'moment'
+import { ServerValue } from 'firebase-admin/database'
 import { v4 as uuid } from 'uuid'
-import { mealDayPath, mealMonthPath, mealPlanPath, mealPlanPathParts } from '@/lib/paths'
+import { mealDayPath, mealMonthPath, mealPlanPath, mealPlanPathParts, recipePath } from '@/lib/paths'
 import { readStoredDay, toPlannedMeal } from '@/lib/meals'
 import { MealTypesArray, mealPlanSchema } from '@/modules/meals/validators'
 
@@ -55,6 +56,23 @@ export const MAX_RANGE_DAYS = 62
 
 // A month node holds one child per day, each of which is a day node.
 type StoredMonth = Record<string, StoredDay>
+
+/**
+ * A recipe keeps a running total of how many meals point at it, which orders the recipe list in
+ * the web app. The CLI plans meals too, so it maintains the same total, by atomic increment so
+ * that a plan made in a browser at the same moment cannot be lost.
+ *
+ * A recipe that does not exist is skipped rather than conjured out of an increment.
+ */
+async function countPlannedMeal(recipeId: string, change: 1 | -1) {
+    if (!recipeId || !(await getRecipe(recipeId))) {
+        return
+    }
+
+    await getMealPlannerDatabase()
+        .ref(recipePath(recipeId))
+        .update({ timesPlanned: ServerValue.increment(change) })
+}
 
 export async function listPlans(
     from: Moment,
@@ -210,6 +228,8 @@ export async function createPlan(input: PlanInput): Promise<PlannedMeal> {
         .ref(mealPlanPath(year, month, day, plan.type, plan.id))
         .set(plan)
 
+    await countPlannedMeal(plan.recipeId, 1)
+
     return plan
 }
 
@@ -247,6 +267,12 @@ export async function updatePlan(
     await getMealPlannerDatabase()
         .ref(mealPlanPath(year, month, day, existing.type, planId))
         .set(updated)
+
+    // A swapped recipe moves the count off the old one and onto the new one.
+    if (existing.recipeId !== updated.recipeId) {
+        await countPlannedMeal(existing.recipeId, -1)
+        await countPlannedMeal(updated.recipeId, 1)
+    }
 
     return updated
 }
@@ -315,6 +341,8 @@ export async function deletePlan(planId: string, date: Moment, type?: MealType):
     await getMealPlannerDatabase()
         .ref(mealPlanPath(year, month, day, existing.type, planId))
         .remove()
+
+    await countPlannedMeal(existing.recipeId, -1)
 
     return existing
 }

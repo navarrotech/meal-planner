@@ -29,3 +29,6 @@ firebase-service-account.json
 
 .firebase
 .firebaserc
+
+# Exported backups hold the family's meals and recipes. This repository is public.
+/backups

@@ -78,6 +78,9 @@ Rules worth knowing:
   round trips are the same.
 - `--missing` replaces the whole list rather than appending, and implies `--needs-ingredients`
   unless `--no-needs-ingredients` is passed alongside it. See `docs/shopping-list.md`.
+- Planning and unplanning a meal maintain the recipe's `timesPlanned`, the same total the web app
+  keeps, so ordering the recipe list by use does not depend on which surface planned the meal. See
+  `docs/data.md`.
 
 ### Example
 
