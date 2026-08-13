@@ -53,6 +53,17 @@
         &:hover
             background: rgba(255, 255, 255, 0.4)
 
+        // Eating out is not cooking, and the calendar should say so without being read. The
+        // colour comes from the recipe's own type, so a restaurant stands out in whichever
+        // slot it was dropped into.
+        &.restaurant
+            background: rgba($purple, 0.85)
+
+            &:hover
+                background: rgba($purple, 0.7)
+
+        // Declared after the colours above so a meal that needs shopping keeps its warning
+        // whatever kind of meal it is. Waiting on the store outranks where it is eaten.
         // A meal still waiting on a trip to the store has to read as "not ready" from across
         // the kitchen, so it glows rather than carrying a badge that has to be hunted for.
         &.needsIngredients

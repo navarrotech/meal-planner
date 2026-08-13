@@ -19,6 +19,14 @@ import { faCartShopping } from "@fortawesome/free-solid-svg-icons";
 import styles from '../calendar.module.sass'
 import { createMealPlanFromRecipe, deleteMealPlan } from "../actions";
 
+/**
+ * Only the kinds of meal that are worth spotting at a glance carry a colour. Everything else is
+ * something cooked at home and stays neutral, which is what makes the exceptions readable.
+ */
+const styleByRecipeType: Partial<Record<MealType, string>> = {
+    restaurants: styles.restaurant
+}
+
 type Props = {
     date: typeof moment
     type: MealType
@@ -99,6 +107,10 @@ export default function Dropzone({ date, type, plannedMeals }: Props) {
                 const key = meal.id + "-" + index
 
                 const classes = [ styles.plannedMeal ]
+                const recipeStyle = recipe && styleByRecipeType[recipe.type]
+                if (recipeStyle){
+                    classes.push(recipeStyle)
+                }
                 if (isBeingReDragged === meal.id){
                     classes.push(styles.reDragged)
                 }

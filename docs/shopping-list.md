@@ -40,6 +40,26 @@ itself the signal.
 The list covers every slot stored for those days, including `snack`, `sides`, `restaurants` and
 `drinks`, which the calendar itself cannot draw. A snack scheduled from the CLI still needs buying.
 
+## Ticking an item off
+
+Every row carries a checkbox, so the list can be shopped from rather than only consulted.
+
+Ticking writes through to the meals rather than into a list of its own. There is one truth about
+what a meal still needs, and the shopping list is a view of it: buying rice takes rice off every
+meal that was waiting for it, and a meal waiting on nothing is no longer waiting, so its mark
+clears with its last item. The warning leaves the calendar as the shopping gets done, which is the
+whole point of marking it in the first place.
+
+A ticked item stays on screen, struck through, until the modal is closed. Without that it would
+vanish the instant it was ticked, which is both disorienting mid-shop and impossible to undo.
+Unticking puts the ingredient back on the same meals.
+
+Those meals are remembered by id rather than by value, because the record changes the moment the
+write lands: putting back a stale copy would undo whatever else happened in between.
+
+A meal marked without naming anything gets a checkbox too. There is nothing to cross off it, so
+ticking simply says the meal is sorted and clears its mark.
+
 ## The list looks further ahead than the calendar does
 
 `SHOPPING_HORIZON_DAYS` is 62. The list, and the badge, cover the visible week's first day and the

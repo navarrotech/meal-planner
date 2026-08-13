@@ -9,7 +9,7 @@ by window width at render time.
 The header's arrows step one screenful: a week on a desktop, a day on a phone. **Left and right
 arrow keys do the same thing**, so a month of planning does not have to be done with the mouse. The
 arrow buttons name their shortcut in a tooltip, since a keyboard shortcut nobody knows about is not
-a feature.
+a feature. **Today** returns to the current week from wherever the arrows have wandered.
 
 `goToAdjacentPeriod` in `src/modules/meals/Layout.tsx` is the single definition of that step, shared
 by both, so the two can never disagree about how far a press moves.
@@ -23,6 +23,23 @@ something else:
   keyboard, and the calendar behind the dialog stays where it was left.
 
 Arrows held with ctrl, meta, alt or shift are left alone as well, since those are the browser's.
+
+## How a meal is coloured
+
+A planned meal is grey. Two things change that, and both are meant to be read without reading the
+meal:
+
+- **Purple: eating out.** The colour comes from the *recipe's* type, not the slot, so a restaurant
+  stands out wherever it was dropped. Burger King in a lunch slot is still eating out.
+- **Amber, glowing: waiting on the store.** See `docs/shopping-list.md`.
+
+Amber is declared after purple so it wins when both apply: waiting on the shopping outranks where
+the meal is eaten.
+
+`styleByRecipeType` in `src/modules/meals/components/Dropzone.tsx` is the map. Only the kinds worth
+spotting at a glance appear in it; everything else is cooked at home and stays neutral, which is
+what makes the exceptions readable. Adding a colour for `drinks` or `snack` is one line there and
+one rule in `calendar.module.sass`.
 
 ## What the days are drawn from
 

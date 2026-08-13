@@ -158,6 +158,14 @@ export default function MealPlanLayout(){
                                 }
                                 <Button
                                     className="has-tooltip-arrow"
+                                    aria-label={`Go to this ${periodName}`}
+                                    data-tooltip={`Go to this ${periodName}`}
+                                    onClick={() => setDate(moment().startOf(isMobile() ? "day" : "week"))}
+                                >
+                                    <span>Today</span>
+                                </Button>
+                                <Button
+                                    className="has-tooltip-arrow"
                                     aria-label={`Previous ${periodName}`}
                                     data-tooltip={`Previous ${periodName} (←)`}
                                     onClick={() => goToAdjacentPeriod(-1)}

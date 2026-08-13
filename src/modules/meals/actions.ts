@@ -46,3 +46,50 @@ export async function updateMealPlan(plan: PlannedMeal){
         plan
     )
 }
+
+/**
+ * Buying something is recorded on the meals that were waiting for it rather than in a list of
+ * its own: there is one truth about what a meal still needs, and the shopping list is a view of
+ * it. A meal waiting on nothing is not waiting, so its mark clears with its last item, and the
+ * warning leaves the calendar as the shopping gets done.
+ *
+ * The two directions are exact opposites, so putting something back is not a different idea of
+ * what the record should look like.
+ */
+export async function markIngredientBought(meals: PlannedMeal[], ingredient: string){
+    const bought = ingredient.toLowerCase()
+
+    await Promise.all(
+        meals.map((meal) => {
+            const missingIngredients = meal.missingIngredients.filter(
+                (listed) => listed.toLowerCase() !== bought
+            )
+
+            return updateMealPlan({
+                ...meal,
+                missingIngredients,
+                needsIngredients: Boolean(missingIngredients.length)
+            })
+        })
+    )
+}
+
+export async function markIngredientNeeded(meals: PlannedMeal[], ingredient: string){
+    const needed = ingredient.toLowerCase()
+
+    await Promise.all(
+        meals.map((meal) => {
+            const isAlreadyListed = meal.missingIngredients.some(
+                (listed) => listed.toLowerCase() === needed
+            )
+
+            return updateMealPlan({
+                ...meal,
+                needsIngredients: true,
+                missingIngredients: isAlreadyListed
+                    ? meal.missingIngredients
+                    : [ ...meal.missingIngredients, ingredient ]
+            })
+        })
+    )
+}
